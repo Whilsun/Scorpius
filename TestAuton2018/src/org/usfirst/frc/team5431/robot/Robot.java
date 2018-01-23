@@ -7,6 +7,7 @@
 
 package org.usfirst.frc.team5431.robot;
 
+import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 
@@ -16,6 +17,7 @@ public class Robot extends IterativeRobot {
 
 	private final DriveBase driveBase = new DriveBase();
 	private final Climber climber = new Climber();
+	private final Catapult catapult = new Catapult();
 	private Titan.Xbox controller;
 	
 	@Override
@@ -36,11 +38,8 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		driveBase.drive(controller.getRawAxis(Titan.Xbox.Axis.LEFT_Y), controller.getRawAxis(Titan.Xbox.Axis.RIGHT_Y));
 	
-		if(controller.getRawButton(Titan.Xbox.Button.BUMPER_R)) {
-			climber.climb(1.0);
-		}else{
-			climber.climb(0.0);
-		}
+		climber.setClimbing(controller.getRawButton(Titan.Xbox.Button.BUMPER_R));
+		catapult.setLowering(controller.getRawButton(Titan.Xbox.Button.B));
 	}
 
 }

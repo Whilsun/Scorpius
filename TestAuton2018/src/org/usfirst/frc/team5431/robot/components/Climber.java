@@ -18,7 +18,11 @@ public class Climber {
 		climberRight.set(ControlMode.Follower, climberLeft.getDeviceID());
 	}
 	
-	public void climb(final double val) {
-		climberLeft.set(val);
+	public void setClimbing(final boolean isClimbing) {
+		if(isClimbing) {
+			climberLeft.set(Constants.CLIMBER_SPEED);
+		}else {
+			climberLeft.set(0.0);
+		}
 	}
 }
