@@ -7,5 +7,9 @@ public abstract class Step {
 		IN_PROGRESS, COMPLETE
 	};
 	
+	public abstract void init(final Robot robot);
+	
 	public abstract StepResult periodic(final Robot robot);
+	
+	public abstract void done(final Robot robot);
 }

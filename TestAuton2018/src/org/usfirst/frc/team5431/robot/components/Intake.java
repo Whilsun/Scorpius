@@ -21,6 +21,4 @@ public class Intake {
 		
 		intakeRight.set(ControlMode.Follower, intakeLeft.getDeviceID());
 	}
-	
-	public void setIs
 }

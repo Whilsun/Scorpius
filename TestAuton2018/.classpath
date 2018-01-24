@@ -10,5 +10,6 @@
 	<classpathentry kind="var" path="USERLIBS_DIR/CTRE_Phoenix-sources.jar"/>
 	<classpathentry kind="var" path="USERLIBS_DIR/CTRE_Phoenix.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/TitanUtil"/>
+	<classpathentry kind="var" path="navx-mxp"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
