@@ -19,17 +19,14 @@ import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
 	private final DriveBase driveBase = new DriveBase();
 	private final Climber climber = new Climber();
 	private final Catapult catapult = new Catapult();
-	private final Titan.NavX navx = new Titan.NavX();
 	private Titan.FSi6S driver;
 	private Titan.Xbox operator;
-	
 
 	private final Queue<Step> autonomousSteps = new LinkedList<>();
 
@@ -44,13 +41,9 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
-		navx.reset();
-		navx.resetDisplacement();
-		navx.resetYaw();
-		
 		autonomousSteps.add(new DriveStep(20.0));
 		autonomousSteps.add(new TurnStep(90.0));
-		
+
 		autonomousSteps.element().init(this);
 	}
 
@@ -69,15 +62,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 		}
-		
-		SmartDashboard.putNumber("navx", navx.getAngle());
 	}
-	
+
 	@Override
 	public void teleopInit() {
-		navx.reset();
-		navx.resetDisplacement();
-		navx.resetYaw();
+		driveBase.resetNavx();
 	}
 
 	@Override
@@ -86,12 +75,6 @@ public class Robot extends IterativeRobot {
 
 		climber.setClimbing(operator.getRawButton(Titan.Xbox.Button.BUMPER_R));
 		catapult.setLowering(operator.getRawButton(Titan.Xbox.Button.B));
-	
-		SmartDashboard.putNumber("navx", navx.getAngle());
-	}
-
-	public Titan.NavX getNavx() {
-		return navx;
 	}
 
 	public DriveBase getDriveBase() {

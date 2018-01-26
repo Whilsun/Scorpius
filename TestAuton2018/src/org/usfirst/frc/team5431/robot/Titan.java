@@ -290,4 +290,11 @@ public final class Titan {
 		}
 	}
 
+	public static boolean approxEquals(final double a, final double b, final double epsilon) {
+		if(a == b) {
+			return true;
+		}
+		
+		return Math.abs(a - b) < epsilon;
+	}
 }

@@ -58,6 +58,15 @@ public final class Constants {
 	public final static int ENCODER_RIGHT_DRIVE_CHANNEL_1 = 2;
 	public final static int ENCODER_RIGHT_DRIVE_CHANNEL_2 = 3;
 	public final static boolean ENCODER_RIGHT_DRIVE_INVERTED;
+	
+	//PID
+	public final static double DRIVE_P = 0.022;
+	public final static double DRIVE_I = 0.0012;
+	public final static double DRIVE_D = 0.00031;
+	
+	public final static double TURN_P = 0.0108;//0.14
+	public final static double TURN_I = 0.000004;
+	public final static double TURN_D = 0.000005;
 
 	static {
 		// Catabot
