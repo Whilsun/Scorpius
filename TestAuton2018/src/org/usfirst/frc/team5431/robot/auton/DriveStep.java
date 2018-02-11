@@ -1,14 +1,30 @@
 package org.usfirst.frc.team5431.robot.auton;
 
+import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
+import org.usfirst.frc.team5431.robot.components.DriveBase;
+import org.usfirst.frc.team5431.robot.vision.Vision;
 
-import edu.wpi.first.wpilibj.Encoder;
-
-public class DriveStep extends Step{
-	private final double distance;
+public class DriveStep extends Step {
+	private final double distance, angle, speed;
 	
 	public DriveStep(final double dis) {
+		this(dis, 0.0);
+	}
+	
+	public DriveStep(final double dis, final double ang) {
+		this(dis, ang, Constants.AUTO_ROBOT_DEFAULT_SPEED);
+	}
+	
+	public DriveStep(final double dis, final double ang, final double spd) {
 		distance = dis;
+		angle = ang;
+		
+		if(distance < 0) speed = -spd;
+		else speed = spd;
+		
+		name = "DriveStep";
+		properties = String.format("Distance %.2f : Heading %.2f", distance, angle);
 	}
 	
 	public double getDistance() {
@@ -17,26 +33,21 @@ public class DriveStep extends Step{
 
 	@Override
 	public StepResult periodic(final Robot robot) {
-		robot.getDriveBase().drivePID(0.3, 5);
-		
-		final Encoder encoder = robot.getDriveBase().getLeftEncoder();
-		if((distance < 0 && encoder.getDistance() < distance) || (encoder.getDistance() > distance)) {
+		if(robot.getDriveBase().hasTravelled(distance)) {
 			return StepResult.COMPLETE;
 		}
-		
 		return StepResult.IN_PROGRESS;
 	}
 
 	@Override
 	public void init(final Robot robot) {
 		robot.getDriveBase().reset();
-		robot.getDriveBase().enablePID();
+		robot.getDriveBase().drivePID(distance, angle, speed, DriveBase.TitanPIDSource.NAVX, Vision.TargetMode.Normal);
 	}
 
 	@Override
 	public void done(final Robot robot) {
-		robot.getDriveBase().disablePID();
+		robot.getDriveBase().disableAllPID();
 		robot.getDriveBase().drive(0.0, 0.0);
 	}
-
 }

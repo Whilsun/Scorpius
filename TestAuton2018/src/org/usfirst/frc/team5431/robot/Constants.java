@@ -5,9 +5,33 @@ public final class Constants {
 		CATABOT, THRICE
 	}
 
-	private static final RobotMappings ROBOT_MAPPINGS = RobotMappings.THRICE;
-
-	// TALONS
+	private static enum CameraSettings {
+		LIFECAM
+	}
+	
+	/*
+	 * MAIN CONFIGURATIONS
+	 */
+	private static final RobotMappings ROBOT_MAPPINGS = RobotMappings.CATABOT;
+	private static final CameraSettings CAMERA_SETTINGS = CameraSettings.LIFECAM;
+	
+	/*
+	 * DEBUGGGING
+	 */
+	public final static boolean ENABLE_DEBUGGING = true;
+	
+	/*
+	 * AUTONOMOUS
+	 */
+	public final static boolean AUTO_LOG_PATHFINDING = true;
+	public final static String AUTO_LOG_PATHFINDING_NAME = "right_scale";
+	public final static double AUTO_ROBOT_DEFAULT_SPEED = 0.45;
+	
+	
+	/*
+	 * TALONS
+	 */
+	public final static int TALON_UNUSED = 200;
 	public final static int TALON_FRONT_LEFT_ID;
 	public final static boolean TALON_FRONT_LEFT_INVERTED;
 
@@ -31,13 +55,16 @@ public final class Constants {
 
 	public final static int TALON_INTAKE_RIGHT_ID;
 	public final static boolean TALON_INTAKE_RIGHT_INVERTED;
+	
+	public final static int TALON_INTAKE_PINCHER_ID;
+	public final static boolean TALON_INTAKE_PINCHER_INVERTED;
+	
+	public final static int TALON_INTAKE_UP_LEFT_ID;
+	public final static boolean TALON_INTAKE_UP_LEFT_INVERTED;
 
-	public final static int TALON_INTAKE_ACTUATION_ID;
-	public final static boolean TALON_INTAKE_ACTUATION_INVERTED;
-
-	public final static int TALON_INTAKE_UP_ID;
-	public final static boolean TALON_INTAKE_UP_INVERTED;
-
+	public final static int TALON_INTAKE_UP_RIGHT_ID;
+	public final static boolean TALON_INTAKE_UP_RIGHT_INVERTED;
+	
 	public final static int TALON_CATAPULT_LEFT_ID;
 	public final static boolean TALON_CATAPULT_LEFT_INVERTED;
 
@@ -50,73 +77,199 @@ public final class Constants {
 	public final static int TALON_CLIMBER_LEFT_ID;
 	public final static boolean TALON_CLIMBER_LEFT_INVERTED;
 	
-	//ENCODERS
-	public final static int ENCODER_LEFT_DRIVE_CHANNEL_1 = 0;
+	/*
+	 * ENCODERS
+	 */
+	//Physical properties
+	public final static double ROBOT_WHEEL_DIAMETER = 6.0; //WHEEL DIAMETER IN INCHES
+	
+	//Left side
+	/*public final static int ENCODER_LEFT_DRIVE_CHANNEL_1 = 0;
 	public final static int ENCODER_LEFT_DRIVE_CHANNEL_2 = 1;
 	public final static boolean ENCODER_LEFT_DRIVE_INVERTED;
 	
+	//Right side
 	public final static int ENCODER_RIGHT_DRIVE_CHANNEL_1 = 2;
 	public final static int ENCODER_RIGHT_DRIVE_CHANNEL_2 = 3;
-	public final static boolean ENCODER_RIGHT_DRIVE_INVERTED;
+	public final static boolean ENCODER_RIGHT_DRIVE_INVERTED; */
 	
-	//PID
-	public final static double DRIVE_P = 0.022;
-	public final static double DRIVE_I = 0.0012;
-	public final static double DRIVE_D = 0.00031;
+	//Calcs
+	public final static int ENCODER_STEPS_PER_FULL_ROTATION = 4096;
+	//public final static int ENCODER_SAMPLES_TO_AVERAGE = 25; //5 steps to average
+	public final static double ENCODER_DISTANCE_PER_PULSE = (ROBOT_WHEEL_DIAMETER * Math.PI) / ENCODER_STEPS_PER_FULL_ROTATION;
 	
-	public final static double TURN_P = 0.0108;//0.14
-	public final static double TURN_I = 0.000004;
-	public final static double TURN_D = 0.000005;
+	//Pincher
+	public final static boolean ENCODER_PINCHER_INVERTED = false;
+	public final static int ENCODER_PINCHER_FORWARD_LIMIT = 200; //Encoder count limit
+	public final static boolean ENCODER_PINCHER_FORWARD_LIMIT_ENABLED = true;
+	public final static int ENCODER_PINCHER_REVERSE_LIMIT = 0; //Encoder count reverse limit
+	public final static boolean ENCODER_PINCHER_REVERSE_LIMIT_ENABLED = false;
+	
+	/*
+	 * PID
+	 */
+	/*//Driving
+	public final static double DRIVE_HEADING_P = 0.015;
+	public final static double DRIVE_HEADING_I = 0.0022;
+	public final static double DRIVE_HEADING_D = 0.00031;
+	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
+	
+	//Distance
+	public final static double DRIVE_DISTANCE_P = 0.015;
+	public final static double DRIVE_DISTANCE_I = 0.0022;
+	public final static double DRIVE_DISTANCE_D = 0.00031;
+	
+	//Turning
+	public final static double TURN_P = 0.003;//0.14
+	public final static double TURN_I = 0.000008;
+	public final static double TURN_D = 0.000003;
+	public final static double TURN_MIN_VALUE = 0.1;
+	public final static double TURN_PRECISION = 1.0; //Make sure the turn is within the degree
 
+	//Vision
+	public final static double VISION_P = 0.006;
+	public final static double VISION_I = 0.000125; //0.00000007;
+	public final static double VISION_D = 0.0075; //0.0005;
+	public final static double VISION_MIN_MAX = 0.5;
+	
+	public final static double PIVOT_DISTANCE_SCALING = 0.11;*/
+	//Driving
+	public final static double DRIVE_HEADING_P = 0.018;
+	public final static double DRIVE_HEADING_I = 0.00;
+	public final static double DRIVE_HEADING_D = 0.08;
+	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
+	
+	//Distance
+	public final static double DRIVE_DISTANCE_P = 0.00632;
+	public final static double DRIVE_DISTANCE_I = 0.0000000025; //0.0003; //0.0022;
+	public final static double DRIVE_DISTANCE_D = 0.000915; //0.00031;
+	public final static double DRIVE_DISTANCE_MAX_OFFSET = 20; //Maximum error
+	
+	//Turning
+	public final static double TURN_P = 0.00325;
+	public final static double TURN_I = 0.000185;
+	public final static double TURN_D = 0.0000095;
+	public final static double TURN_MIN_VALUE = 0.1;
+	public final static double TURN_PRECISION = 1.0; //Make sure the turn is within the degree
+
+	//Vision
+	public final static double VISION_P = 0.006;
+	public final static double VISION_I = 0.000125; //0.00000007;
+	public final static double VISION_D = 0.0075; //0.0005;
+	public final static double VISION_MIN_MAX = 0.5;
+		
+	public final static double PIVOT_DISTANCE_SCALING = 0.11;
+ 
+	/*
+	 * CURRENT LIMITING
+	 */
+	//Intake
+	public final static int INTAKE_PINCHER_CONTINUOUS_LIMIT = 15;
+	public final static int INTAKE_PINCHER_PEAK_LIMIT = 25;
+	public final static int INTAKE_PINCHER_PEAK_DURATION = 100;
+	public final static boolean INTAKE_PINCHER_ENABLE_CURRENT_LIMITING = true;
+	
+	
+	/*
+	 * RAMP RATES
+	 */
+	//Intake
+	public final static int INTAKE_PINCHER_RAMP_RATE = 0;
+	
+	public static class Vision {
+		public final static int IMAGE_WIDTH = 320; 
+		public final static int IMAGE_HEIGHT = 240;
+		public final static int FPS = 10;
+		public final static double CAMERA_HORZ_FOV;
+		public final static double CAMERA_VERT_FOV;
+		public final static double CAMERA_DIAG_DIST;
+		public final static double DEGREES_PER_HORZ_PIXEL;
+		public final static double DEGREES_PER_VERT_PIXEL;
+		public final static double CAMERA_HORZ_OFFSET;
+		public final static double CAMERA_VERT_OFFSET;
+		
+		static {
+			//CAMERA SPECIFIC SETTINGS
+			switch(CAMERA_SETTINGS) {
+			case LIFECAM:
+			default:
+				CAMERA_DIAG_DIST = Math.sqrt((IMAGE_WIDTH * IMAGE_WIDTH) + (IMAGE_HEIGHT * IMAGE_HEIGHT));
+				CAMERA_HORZ_FOV = (360 * Math.atan((IMAGE_WIDTH / 2) / CAMERA_DIAG_DIST)) / Math.PI; //58.5
+				CAMERA_VERT_FOV = (360 * Math.atan((IMAGE_HEIGHT / 2) / CAMERA_DIAG_DIST)) / Math.PI; //45.6
+				DEGREES_PER_HORZ_PIXEL = CAMERA_HORZ_FOV / (double) IMAGE_WIDTH;
+				DEGREES_PER_VERT_PIXEL = CAMERA_VERT_FOV / (double) IMAGE_HEIGHT;
+				CAMERA_HORZ_OFFSET = 0.0;
+				CAMERA_VERT_OFFSET = 0.0;
+			}
+		}
+
+		public final static double fromCenter(final double pixel, final double dims) {
+			return pixel - (dims / 2.0);
+		}
+		//The Chicken AlGoul Is Ready, Are You?
+
+		public final static double angleFromCenter(final double center, final double degreesPerPixel) {
+			return center * degreesPerPixel;
+		}
+		
+		public final static double getHorzAngle(final double pixel) {
+			return angleFromCenter(fromCenter(pixel, IMAGE_WIDTH), DEGREES_PER_HORZ_PIXEL) + CAMERA_HORZ_OFFSET;
+		}
+		
+		public final static double getVertAngle(final double pixel) {
+			return angleFromCenter(fromCenter(pixel, IMAGE_HEIGHT), DEGREES_PER_VERT_PIXEL) + CAMERA_VERT_OFFSET;
+		}
+	}
+	
 	static {
 		// Catabot
 		switch (ROBOT_MAPPINGS) {
 		case CATABOT:
 		default:
-			TALON_FRONT_LEFT_ID = 0;
+			TALON_FRONT_LEFT_ID = 1;
 			TALON_FRONT_LEFT_INVERTED = true;
 
-			TALON_MIDDLE_LEFT_ID = 1;
-			TALON_MIDDLE_LEFT_INVERTED = false;
+			TALON_MIDDLE_LEFT_ID = 2;
+			TALON_MIDDLE_LEFT_INVERTED = true;
 
-			TALON_BACK_LEFT_ID = 2;
+			TALON_BACK_LEFT_ID = 3;
 			TALON_BACK_LEFT_INVERTED = true;
 
-			TALON_FRONT_RIGHT_ID = 3;
+			TALON_FRONT_RIGHT_ID = 4;
 			TALON_FRONT_RIGHT_INVERTED = false;
 
-			TALON_MIDDLE_RIGHT_ID = 4;
+			TALON_MIDDLE_RIGHT_ID = 5;
 			TALON_MIDDLE_RIGHT_INVERTED = false;
 
-			TALON_BACK_RIGHT_ID = 5;
+			TALON_BACK_RIGHT_ID = 6;
 			TALON_BACK_RIGHT_INVERTED = false;
 
-			TALON_INTAKE_LEFT_ID = 6;
+			TALON_INTAKE_LEFT_ID = TALON_UNUSED;
 			TALON_INTAKE_LEFT_INVERTED = false;
 
-			TALON_INTAKE_RIGHT_ID = 7;
+			TALON_INTAKE_RIGHT_ID = TALON_UNUSED;
 			TALON_INTAKE_RIGHT_INVERTED = false;
 
-			TALON_INTAKE_ACTUATION_ID = 8;
-			TALON_INTAKE_ACTUATION_INVERTED = false;
+			TALON_INTAKE_PINCHER_ID = TALON_UNUSED;
+			TALON_INTAKE_PINCHER_INVERTED = false;
 
-			TALON_INTAKE_UP_ID = 9;
-			TALON_INTAKE_UP_INVERTED = false;
+			TALON_INTAKE_UP_LEFT_ID = TALON_UNUSED;
+			TALON_INTAKE_UP_LEFT_INVERTED = false;
 
-			TALON_CATAPULT_LEFT_ID = 10;
+			TALON_INTAKE_UP_RIGHT_ID = TALON_UNUSED;
+			TALON_INTAKE_UP_RIGHT_INVERTED = true;
+			
+			TALON_CATAPULT_LEFT_ID = TALON_UNUSED;
 			TALON_CATAPULT_LEFT_INVERTED = false;
 
-			TALON_CATAPULT_RIGHT_ID = 11;
+			TALON_CATAPULT_RIGHT_ID = TALON_UNUSED;
 			TALON_CATAPULT_RIGHT_INVERTED = false;
 
-			TALON_CLIMBER_RIGHT_ID = 12;
+			TALON_CLIMBER_RIGHT_ID = TALON_UNUSED;
 			TALON_CLIMBER_RIGHT_INVERTED = true;
 
-			TALON_CLIMBER_LEFT_ID = 13;
+			TALON_CLIMBER_LEFT_ID = TALON_UNUSED;
 			TALON_CLIMBER_LEFT_INVERTED = false;
-			
-			ENCODER_LEFT_DRIVE_INVERTED = false;
-			ENCODER_RIGHT_DRIVE_INVERTED = false;
 			break;
 
 		case THRICE:
@@ -138,22 +291,25 @@ public final class Constants {
 			TALON_BACK_RIGHT_ID = 3;
 			TALON_BACK_RIGHT_INVERTED = true;
 
-			TALON_INTAKE_LEFT_ID = 0;
+			TALON_INTAKE_LEFT_ID = TALON_UNUSED;
 			TALON_INTAKE_LEFT_INVERTED = false;
 
-			TALON_INTAKE_RIGHT_ID = 0;
+			TALON_INTAKE_RIGHT_ID = TALON_UNUSED;
 			TALON_INTAKE_RIGHT_INVERTED = false;
 
-			TALON_INTAKE_ACTUATION_ID = 0;
-			TALON_INTAKE_ACTUATION_INVERTED = false;
+			TALON_INTAKE_PINCHER_ID = TALON_UNUSED;
+			TALON_INTAKE_PINCHER_INVERTED = false;
 
-			TALON_INTAKE_UP_ID = 0;
-			TALON_INTAKE_UP_INVERTED = false;
+			TALON_INTAKE_UP_LEFT_ID = TALON_UNUSED;
+			TALON_INTAKE_UP_LEFT_INVERTED = false;
 
-			TALON_CATAPULT_LEFT_ID = 0;
+			TALON_INTAKE_UP_RIGHT_ID = TALON_UNUSED;
+			TALON_INTAKE_UP_RIGHT_INVERTED = false;
+			
+			TALON_CATAPULT_LEFT_ID = TALON_UNUSED;
 			TALON_CATAPULT_LEFT_INVERTED = false;
 
-			TALON_CATAPULT_RIGHT_ID = 0;
+			TALON_CATAPULT_RIGHT_ID = TALON_UNUSED;
 			TALON_CATAPULT_RIGHT_INVERTED = false;
 
 			TALON_CLIMBER_RIGHT_ID = 6;
@@ -162,8 +318,8 @@ public final class Constants {
 			TALON_CLIMBER_LEFT_ID = 8;
 			TALON_CLIMBER_LEFT_INVERTED = false;
 			
-			ENCODER_LEFT_DRIVE_INVERTED = true;
-			ENCODER_RIGHT_DRIVE_INVERTED = false;
+			//ENCODER_LEFT_DRIVE_INVERTED = true;
+			//ENCODER_RIGHT_DRIVE_INVERTED = false;
 			break;
 		}
 	}

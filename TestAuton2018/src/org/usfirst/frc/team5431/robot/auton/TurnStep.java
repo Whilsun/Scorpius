@@ -1,41 +1,72 @@
 package org.usfirst.frc.team5431.robot.auton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
+import org.usfirst.frc.team5431.robot.components.DriveBase;
 
-public class TurnStep extends Step{
-	private final double degrees;
-
-	public TurnStep(final double deg) {
+public class TurnStep extends Step {
+	private static final double minimumDegree = 20.0;
+	private static final double degreeChunkSize = 90.0;
+	private double degrees;
+	private boolean tooSmall = false;
+	private List<Double> degreeChunks = new ArrayList<Double>();
+	private int currentChunk = 0;
+	
+	public TurnStep(final double deg) { // TODO MAKE THE TURNING MORE SMOOTH BY OVERRIDING THE NAVX ANGLE WITH THE CURRENT MAXIMUM CHUNK! BECAUSE THE BOT SLOWS DOWN AND STOPS...
 		degrees = deg;
+		name = "TurnStep";
+		properties = String.format("Angle %.2f", degrees);
+		
+		while(degrees > degreeChunkSize) {
+			degreeChunks.add(degreeChunkSize);
+			degrees -= degreeChunkSize;
+		}
+		
+		while(degrees < -degreeChunkSize) {
+			degreeChunks.add(-degreeChunkSize);
+			degrees += degreeChunkSize;
+		}
+		
+		if((degrees < 0.0 && degrees > -5.0) || (degrees > 0.0 && degrees < 5.0)) tooSmall = true;
+		
+		degreeChunks.add(degrees);
+		for(double degs : degreeChunks) {
+			Titan.l("mooooved %.2f", degs);
+		}
 	}
 	
 	@Override
 	public void init(final Robot robot) {
 		robot.getDriveBase().reset();
-		robot.getDriveBase().enablePID();
+		final double turnAmt;
+		if(degreeChunks.size() > 1) turnAmt = degreeChunkSize;
+		else if(degreeChunks.size() == 1) turnAmt = degreeChunks.get(0);
+		else if(tooSmall) turnAmt = minimumDegree;
+		else turnAmt = degrees;
+		robot.getDriveBase().turnPID(turnAmt, DriveBase.TitanPIDSource.NAVX);
 	}
 
 	@Override
 	public StepResult periodic(final Robot robot) {
-		final double currentAngle = robot.getDriveBase().getNavx().getAngle();
-		if(Titan.approxEquals(currentAngle, degrees, 0.1)){
-			return StepResult.COMPLETE;
+		final double turnDeg = (double) degreeChunks.get(currentChunk);
+		if(robot.getDriveBase().hasTurned(turnDeg)) {
+			currentChunk++;
+			if((currentChunk + 1) > degreeChunks.size()) return StepResult.COMPLETE;
+			final double newTurnDeg = degreeChunks.get(currentChunk);
+			robot.getDriveBase().disableAllPID();
+			robot.getDriveBase().turnPID(newTurnDeg, DriveBase.TitanPIDSource.NAVX);
 		}
-		
-		if(degrees > 0){
-			robot.getDriveBase().turnPID(0.5, degrees);
-		}else if(degrees < 0){
-			robot.getDriveBase().turnPID(-0.5, degrees);
-		}
-		
 		return StepResult.IN_PROGRESS;
 	}
 
 	@Override
 	public void done(final Robot robot) {
-		robot.getDriveBase().disablePID();
+		robot.getDriveBase().disableAllPID();
 		robot.getDriveBase().drive(0.0, 0.0);
+		//Are you ready for my Chicken AlGhoul?
 	}
 
 }

@@ -10,7 +10,23 @@ import edu.wpi.first.wpilibj.SPI;
  * Namespace for TitanUtil
  */
 public final class Titan {
+	public static boolean DEBUG = true;
 	private Titan() {
+	}
+	
+	/* Log information */
+	public static void l(String base, Object... a) {
+		if(DEBUG) System.out.println(String.format(base, a));
+	}
+	
+	/* Log error */
+	public static void e(String base, Object... a) {
+		if(DEBUG) System.err.println(String.format(base, a));
+	}
+	
+	/* Exception error */
+	public static void ee(String namespace, Exception e) {
+		if(DEBUG) e("%s: %s", namespace, e.getMessage());
 	}
 
 	/**
@@ -58,7 +74,6 @@ public final class Titan {
 				return val;
 			}
 		}
-
 	}
 
 	public static class FSi6S extends Titan.Joystick {
@@ -116,6 +131,10 @@ public final class Titan {
 			return getRawButton(8);
 		}
 
+		public double getRawAxis(final int axis) {
+			return getRawAxis(axis);
+		}
+		
 		public double getRawAxis(final Axis axis) {
 			return getRawAxis(axis.ordinal());
 		}
@@ -264,9 +283,20 @@ public final class Titan {
 				}
 			}
 		}
+		
+		public static enum FieldObject {
+			SWITCH, SCALE, OPPONENT_SWITCH
+		}
+		
+		public static interface SideChooser {
+			void left();
+			void right();
+		}
 
 		private Position allianceSwitch, scale, opponentSwitch;
-
+		private FieldObject selectedObject;
+		
+		
 		public void init() {
 			final String gameData = DriverStation.getInstance().getGameSpecificMessage();
 			if (gameData.length() != 3) {
@@ -287,6 +317,27 @@ public final class Titan {
 
 		public Position getAllianceSwitch() {
 			return allianceSwitch;
+		}
+		
+		public void setSelectedObject(FieldObject fObject) {
+			selectedObject = fObject;
+		}
+		
+		public void runSide(SideChooser toRun) {
+			switch(selectedObject) {
+			case SWITCH:
+				if(getAllianceSwitch() == Position.LEFT) toRun.left();
+				else toRun.right();
+				break;
+			case SCALE:
+				if(getScale() == Position.LEFT) toRun.left();
+				else toRun.right();
+				break;
+			case OPPONENT_SWITCH:
+				if(getOpponentSwitch() == Position.LEFT) toRun.left();
+				else toRun.right();
+				break;
+			}
 		}
 	}
 
