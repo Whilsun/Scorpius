@@ -9,7 +9,7 @@ public class DriveStep extends Step {
 	private final double distance, angle, speed;
 	
 	public DriveStep(final double dis) {
-		this(dis, 0.0);
+		this(dis, 170.0);
 	}
 	
 	public DriveStep(final double dis, final double ang) {
