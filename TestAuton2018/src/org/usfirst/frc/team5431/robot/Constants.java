@@ -25,6 +25,9 @@ public final class Constants {
 	 */
 	public final static boolean AUTO_LOG_PATHFINDING = true;
 	public final static String AUTO_LOG_PATHFINDING_NAME = "right_scale";
+	public final static double AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED = 0.2; //This is the speed to override the previous step
+	public final static double AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_DISTANCE = 3.0; //This is the speed to override the previous step
+	public final static double AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_TURN = 5.0; //Minimum turn offset for the pathfinding to not skip a step
 	public final static double AUTO_ROBOT_DEFAULT_SPEED = 0.45;
 	
 	
@@ -134,10 +137,16 @@ public final class Constants {
 	
 	public final static double PIVOT_DISTANCE_SCALING = 0.11;*/
 	//Driving
-	public final static double DRIVE_HEADING_P = 0.018;
+	/*public final static double DRIVE_HEADING_P = 0.018;
 	public final static double DRIVE_HEADING_I = 0.00;
 	public final static double DRIVE_HEADING_D = 0.08;
-	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
+	public final static double DRIVE_HEADING_MIN_MAX = 0.1;*/
+	
+	//Driving
+	public final static double DRIVE_HEADING_P = 0.030;
+	public final static double DRIVE_HEADING_I = 0.00;
+	public final static double DRIVE_HEADING_D = 0.085;
+	public final static double DRIVE_HEADING_MIN_MAX = 0.3;
 	
 	//Distance
 	public final static double DRIVE_DISTANCE_P = 0.00632;

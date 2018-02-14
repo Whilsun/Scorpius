@@ -169,7 +169,7 @@ public class DriveBase {
 					return rightEncoder.getDistance();
 				}
 			} else */
-			double distance = getDistance();
+			double distance = getLeftDistance();
 			SmartDashboard.putNumber("encoderPosition", distance);
 			if(wantedDistance > 0 && (wantedDistance - distance) > Constants.DRIVE_DISTANCE_MAX_OFFSET) {
 				return Constants.DRIVE_DISTANCE_MAX_OFFSET;
@@ -227,9 +227,14 @@ public class DriveBase {
 		 */
 		//Left side
 		middleLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		//middleLeft.setConfigParameter(ParamEnum.contin)
 		middleLeft.setSensorPhase(false);
 		middleLeft.setSelectedSensorPosition(0, 0, 0);
+		
+		//Right side
+		frontRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+		frontRight.setSensorPhase(false);
+		frontRight.setSelectedSensorPosition(0, 0, 0);
+		
 		/*//Left side
 		leftEncoder = new Encoder(Constants.ENCODER_LEFT_DRIVE_CHANNEL_1, Constants.ENCODER_LEFT_DRIVE_CHANNEL_2, false, EncodingType.k4X);
 		leftEncoder.setDistancePerPulse(Constants.ENCODER_DISTANCE_PER_PULSE);
@@ -365,6 +370,12 @@ public class DriveBase {
 		drivePID.enable();
 	}
 	
+	public final void updateStepResults(final double speed, final double angle) {
+		currentPower = speed;
+		wantedAngle = angle;
+		drivePID.setSetpoint(angle);
+	}
+	
 	public final void drivePID(final double distance) {
 		drivePID(distance, 0.0);
 	}
@@ -441,17 +452,25 @@ public class DriveBase {
 		return navx;
 	}
 	
-	public final double getDistance() {
+	public final double getLeftDistance() {
 		return middleLeft.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
+
+	}
+	
+	public final double getRightDistance() {
+		return frontRight.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
 
 	}	
 	
 	public final boolean hasTravelled(final double wantedDistance) {
+		return hasTravelled(wantedDistance, true);
+	}
+	
+	public final boolean hasTravelled(final double wantedDistance, final boolean isLeft) {
 		if (wantedDistance < 0) {
-			return getDistance() <= wantedDistance;
-			
+			return ((isLeft) ? getLeftDistance() : getRightDistance()) <= wantedDistance;
 		} else {
-			return getDistance() >= wantedDistance;
+			return ((isLeft) ? getLeftDistance() : getRightDistance()) >= wantedDistance;
 		}
 		/*if(wantedDistance < 0) {
 			return leftEncoder.getDistance() < wantedDistance || rightEncoder.getDistance() < wantedDistance;
@@ -472,6 +491,7 @@ public class DriveBase {
 
 	public final void resetEncoders() {
 		middleLeft.setSelectedSensorPosition(0, 0, 0);
+		frontRight.setSelectedSensorPosition(0, 0, 0);
 		//leftEncoder.reset();
 		//rightEncoder.reset();
 	}

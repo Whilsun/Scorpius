@@ -10,24 +10,19 @@ package org.usfirst.frc.team5431.robot;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
-import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
-import org.usfirst.frc.team5431.robot.auton.DriveStep;
+import org.usfirst.frc.team5431.robot.auton.MimicStep;
+import org.usfirst.frc.team5431.robot.auton.MimicStep.Paths;
 import org.usfirst.frc.team5431.robot.auton.Step;
 import org.usfirst.frc.team5431.robot.auton.Step.StepResult;
-import org.usfirst.frc.team5431.robot.auton.TurnStep;
-import org.usfirst.frc.team5431.robot.auton.WaitStep;
 import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
-import org.usfirst.frc.team5431.robot.pathfinding.Logger;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -125,7 +120,7 @@ public class Robot extends IterativeRobot {
 		//driveBase.turnPID(45);
 		//driveBase.driveAtAnglePID(0.4, 0, DriveBase.TitanPIDSource.VISION, Vision.TargetMode.Cube);
 		
-		switch(position) {
+		/*switch(position) {
 		case CENTER: {
 				switch(priority) {
 				case SWITCH: {
@@ -199,27 +194,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 			break;
-		}
+		}*/
+		
+		aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
 		
 		//aSteps.add(new TurnStep(270));
-	
-//		if (playerStation == 2.0) {
-//			switch (autonChooser.getSelected()) {
-//			case AUTO_LINE:
-//				//aSteps.add(new DriveStep(140.0));
-//				break; 
-//			case SWITCH:
-//				aSteps.add(new TurnStep(45));
-//				aSteps.add(new DriveStep(150.0, 25.0));
-//				aSteps.add(new DriveStep(140.0));
-////				aSteps.add(new SwitchCubeStep());
-//				break;
-//			case SCALE:
-//			default:
-//
-//			}
-//		}
-		
 		//aSteps.add(new DriveStep(100)); //new DriveStep(100, 0));
 		
 		//Initialize the autonomous routine
@@ -260,7 +239,7 @@ public class Robot extends IterativeRobot {
 		driveBase.setBrakeMode(false);
 		
 		if(Constants.AUTO_LOG_PATHFINDING) {
-			Logger.init(Constants.AUTO_LOG_PATHFINDING_NAME);
+			Mimic.Observer.prepare(Constants.AUTO_LOG_PATHFINDING_NAME);
 		}
 	}
 
@@ -268,7 +247,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		if(Constants.AUTO_LOG_PATHFINDING) {
 			final double vals[] = teleop.periodicPathfindingDrive(this);
-			Logger.addData(this, vals);
+			Mimic.Observer.addStep(this, vals);
 		} else {
 			teleop.periodicDrive(this);
 		}
@@ -320,7 +299,9 @@ public class Robot extends IterativeRobot {
 	
 	@Override
 	public void testPeriodic() {
-		teleop.periodicDrive(this);
+		teleop.periodicPathfindingDrive(this);
+		SmartDashboard.putNumber("LeftEncoder", driveBase.getLeftDistance());
+		SmartDashboard.putNumber("RightEncoder", driveBase.getRightDistance());
 		/*if(pidChooser.getSelected() == PIDTest.NONE) {
 			driveBase.disableAllPID();
 		}*/
@@ -331,7 +312,7 @@ public class Robot extends IterativeRobot {
 		Vision.setNormalTargetMode();
 		driveBase.disableAllPID();
 		if(Constants.AUTO_LOG_PATHFINDING) {
-			Logger.saveData();
+			Mimic.Observer.saveMimic();
 		}
 	}
 	
