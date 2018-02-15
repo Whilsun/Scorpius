@@ -10,10 +10,15 @@ package org.usfirst.frc.team5431.robot;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
+import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
+import org.usfirst.frc.team5431.robot.auton.DriveStep;
 import org.usfirst.frc.team5431.robot.auton.MimicStep;
 import org.usfirst.frc.team5431.robot.auton.MimicStep.Paths;
 import org.usfirst.frc.team5431.robot.auton.Step;
 import org.usfirst.frc.team5431.robot.auton.Step.StepResult;
+import org.usfirst.frc.team5431.robot.auton.TurnStep;
+import org.usfirst.frc.team5431.robot.auton.WaitStep;
 import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
@@ -50,6 +55,7 @@ public class Robot extends IterativeRobot {
 	private final SendableChooser<AutonPriority> autonChooser = new SendableChooser<AutonPriority>();
 	private final SendableChooser<PIDTest> pidChooser = new SendableChooser<PIDTest>();
 	private final SendableChooser<AutonPosition> positionChooser = new SendableChooser<AutonPosition>();
+	private final SendableChooser<Integer> waitChooser = new SendableChooser<Integer>();
 	
 	@Override
 	public void robotInit() {
@@ -77,6 +83,15 @@ public class Robot extends IterativeRobot {
 		positionChooser.addDefault("Center", AutonPosition.CENTER);
 		positionChooser.addObject("Right", AutonPosition.RIGHT);
 		SmartDashboard.putData("AutonPosition", positionChooser);
+		
+		//waitChooser
+		waitChooser.addDefault("None", 0);
+		waitChooser.addObject("One", 1);
+		waitChooser.addObject("Two", 2);
+		waitChooser.addObject("Three", 3);
+		waitChooser.addObject("Four", 4);
+		waitChooser.addObject("Five", 5);
+		SmartDashboard.putData("AutonWait", waitChooser);
 		
 		//Add the driveBase PID Source
 		driveBase.setFullSource(TitanPIDSource.NAVX, true, Vision.TargetMode.Cube);
@@ -108,8 +123,9 @@ public class Robot extends IterativeRobot {
 		System.out.println("\tPriority: " + autonChooser.getSelected());
 		System.out.println("\tData: "+ DriverStation.getInstance().getGameSpecificMessage());*/
 		
-		AutonPriority priority = autonChooser.getSelected();
-		AutonPosition position = positionChooser.getSelected();
+		final AutonPriority priority = autonChooser.getSelected();
+		final AutonPosition position = positionChooser.getSelected();
+		final long waitMillis = ((long) waitChooser.getSelected()) * 1000;
 
 		
 		//Vision.setCubeTargetMode();
@@ -120,7 +136,10 @@ public class Robot extends IterativeRobot {
 		//driveBase.turnPID(45);
 		//driveBase.driveAtAnglePID(0.4, 0, DriveBase.TitanPIDSource.VISION, Vision.TargetMode.Cube);
 		
-		/*switch(position) {
+		//Add the wait selector to the smart dashboard
+		if(waitMillis != 0) aSteps.add(new WaitStep(waitMillis));
+		
+		switch(position) {
 		case CENTER: {
 				switch(priority) {
 				case SWITCH: {
@@ -194,9 +213,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 			break;
-		}*/
+		}
 		
-		aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
+		//aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
+		
+		//aSteps.add(new DriveStep(100));
 		
 		//aSteps.add(new TurnStep(270));
 		//aSteps.add(new DriveStep(100)); //new DriveStep(100, 0));

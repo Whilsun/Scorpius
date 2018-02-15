@@ -143,10 +143,16 @@ public final class Constants {
 	public final static double DRIVE_HEADING_MIN_MAX = 0.1;*/
 	
 	//Driving
-	public final static double DRIVE_HEADING_P = 0.030;
+	public final static double DRIVE_HEADING_P = 0.018;
 	public final static double DRIVE_HEADING_I = 0.00;
 	public final static double DRIVE_HEADING_D = 0.085;
-	public final static double DRIVE_HEADING_MIN_MAX = 0.3;
+	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
+	
+	//Mimic
+	public final static double DRIVE_MIMIC_P = 0.025;
+	public final static double DRIVE_MIMIC_I = 0.00;
+	public final static double DRIVE_MIMIC_D = 0.065;
+	public final static double DRIVE_MIMIC_MIN_MAX = 0.3;
 	
 	//Distance
 	public final static double DRIVE_DISTANCE_P = 0.00632;

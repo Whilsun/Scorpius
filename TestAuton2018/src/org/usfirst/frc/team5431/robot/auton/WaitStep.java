@@ -8,6 +8,8 @@ public class WaitStep extends Step {
 	private long startTime;
 	
 	public WaitStep(final long ms) {
+		name = "WaitStep";
+		properties = String.format("Millis %d", ms);
 		durationMS = ms;
 	}
 

@@ -4,7 +4,6 @@ import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -17,7 +16,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class DriveBase {
 	public enum TitanPIDSource {
-		NAVX, VISION, __DO_NOT_CHANGE
+		NAVX, VISION, NAVX_MIMIC,  __DO_NOT_CHANGE
+	}
+	
+	public enum TitanPIDValues {
+		NORMAL, VISION, MIMIC
 	}
 	
 	public enum TitanPIDType {
@@ -30,10 +33,10 @@ public class DriveBase {
 
 	private TitanPIDSource pidSourceType = TitanPIDSource.NAVX;
 	private TitanPIDType pidType = TitanPIDType.NONE;
+	private TitanPIDValues pidValues = TitanPIDValues.NORMAL;
 	private double wantedAngle = 0.0;
 	private double wantedDistance = 0.0;
 	private double currentPower = 0.0;
-	private boolean isVision = false;
 	private boolean pidPower = false;
 	private final DriveBasePIDSource pidSource = new DriveBasePIDSource();
 	private final DriveBasePIDOutput pidOutput = new DriveBasePIDOutput();
@@ -61,6 +64,7 @@ public class DriveBase {
 			if(pidType == TitanPIDType.NONE) return wantedAngle; //This fixes the I going out of control problem (DO NOT TOUCH)
 			
 			switch(pidSourceType) {
+			case NAVX_MIMIC:
 			case NAVX:
 				SmartDashboard.putNumber("yaw", navx.getYaw());
 				return navx.getYaw();
@@ -215,12 +219,14 @@ public class DriveBase {
 		 * MASTER-SLAVE RELATIONSHIPS
 		 */
 		//Left side
-		backLeft.set(ControlMode.Follower, frontLeft.getDeviceID());
-		middleLeft.set(ControlMode.Follower, frontLeft.getDeviceID());
+		//backLeft.follow(frontLeft);
+		//middleLeft.follow(frontLeft);
+		//backLeft.set(ControlMode.Follower, Constants.TALON_FRONT_LEFT_ID);
+		//middleLeft.set(ControlMode.Follower, Constants.TALON_FRONT_LEFT_ID);
 
 		//Right side
-		backRight.set(ControlMode.Follower, frontRight.getDeviceID());
-		middleRight.set(ControlMode.Follower, frontRight.getDeviceID());
+		//backRight.set(ControlMode.Follower, frontRight.getDeviceID());
+		//middleRight.set(ControlMode.Follower, frontRight.getDeviceID());
 
 		/*
 		 * ENCODER DEFINITIONS
@@ -299,17 +305,17 @@ public class DriveBase {
 		pidSourceType = TitanPIDSource.VISION;
 	}
 	
-	public final void setPIDNormal() {
-		isVision = false;
-	}
-	
-	public final void setPIDVision() {
-		isVision = true;
+	public final void setPIDValues(TitanPIDValues values) {
+		pidValues = values;
 	}
 
 	public final void drive(final double left, final double right) {
 		frontLeft.set(left);
+		middleLeft.set(left);
+		backLeft.set(left);
 		frontRight.set(right);
+		middleRight.set(right);
+		backRight.set(right);
 	}
 	
 	public final void setFullSource(final TitanPIDSource source, boolean disableCurrent, Vision.TargetMode mode) {
@@ -322,27 +328,39 @@ public class DriveBase {
 		case NAVX:
 			Vision.setTargetMode(mode);
 			setNavxSource();
-			setPIDNormal();
+			setPIDValues(TitanPIDValues.NORMAL);
 			break;
 		case VISION:
 			Vision.setTargetMode(mode);
 			setVisionSource();
-			setPIDVision();
+			setPIDValues(TitanPIDValues.VISION);
 			break;
+		case NAVX_MIMIC:
+			Vision.setTargetMode(mode);
+			setNavxSource();
+			setPIDValues(TitanPIDValues.MIMIC);
 		case __DO_NOT_CHANGE:
 			break;
 		}
 	}
 	
 	public final void setDrivePIDValues() {
-		if(isVision) {
-			drivePID.setPID(Constants.VISION_P, Constants.VISION_I, Constants.VISION_D, 0.0);
-			drivePID.setOutputRange(-1, 1);
-			SmartDashboard.putBoolean("isVision", true);
-		} else {
+		switch(pidValues) {
+		case NORMAL:
 			drivePID.setPID(Constants.DRIVE_HEADING_P, Constants.DRIVE_HEADING_I, Constants.DRIVE_HEADING_D, 0.0);
 			drivePID.setOutputRange(-Constants.DRIVE_HEADING_MIN_MAX, Constants.DRIVE_HEADING_MIN_MAX);
-			SmartDashboard.putBoolean("isVision", false);
+			SmartDashboard.putString("PIDValues", "Normal");
+			break;
+		case VISION:
+			drivePID.setPID(Constants.VISION_P, Constants.VISION_I, Constants.VISION_D, 0.0);
+			drivePID.setOutputRange(-1, 1);
+			SmartDashboard.putString("PIDValues", "Vision");
+			break;
+		case MIMIC:
+			drivePID.setPID(Constants.DRIVE_MIMIC_P, Constants.DRIVE_MIMIC_I, Constants.DRIVE_MIMIC_D, 0.0);
+			drivePID.setOutputRange(-Constants.DRIVE_MIMIC_MIN_MAX, Constants.DRIVE_MIMIC_MIN_MAX);
+			SmartDashboard.putString("PIDValues", "Mimic");
+			break;
 		}
 	}
 	
