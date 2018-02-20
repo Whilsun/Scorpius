@@ -32,8 +32,8 @@ public class Logger {
 			double distance = robot.getDriveBase().getLeftDistance();
 			double drivePower = (driveVals[0] + driveVals[1]) / 2.0;
 			float angle = robot.getDriveBase().getNavx().getYaw();
-			int isDrive = (robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.TRIGGER_RIGHT) > 0.5) ? 1 : 0;
-			int isTurn = (robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.TRIGGER_LEFT) > 0.5) ? 1 : 0;
+			int isDrive = (robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.LEFT_Y) > 0.5) ? 1 : 0;
+			int isTurn = (robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.RIGHT_Y) > 0.5) ? 1 : 0;
 			if(isTurn == 0 && isDrive == 0) {
 				robot.getDriveBase().setHome(); //RESET EVERYTHING
 			}

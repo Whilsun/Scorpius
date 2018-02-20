@@ -2,27 +2,45 @@ package org.usfirst.frc.team5431.robot.components;
 
 import org.usfirst.frc.team5431.robot.Constants;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Climber {
-	private final WPI_TalonSRX climberLeft, climberRight;
+	private final WPI_TalonSRX climberLeft, climberRight, scissor;
 
 	public Climber() {
 		climberLeft = new WPI_TalonSRX(Constants.TALON_CLIMBER_LEFT_ID);
 		climberRight = new WPI_TalonSRX(Constants.TALON_CLIMBER_RIGHT_ID);
+		scissor = new WPI_TalonSRX(Constants.TALON_SCISSOR_ID);
 		
 		climberLeft.setInverted(Constants.TALON_CLIMBER_LEFT_INVERTED);
 		climberRight.setInverted(Constants.TALON_CLIMBER_RIGHT_INVERTED);
+		scissor.setInverted(Constants.TALON_SCISSOR_INVERTED);
 		
-		climberRight.set(ControlMode.Follower, climberLeft.getDeviceID());
+		climberLeft.setNeutralMode(NeutralMode.Brake);
+		climberRight.setNeutralMode(NeutralMode.Brake);
+		scissor.setNeutralMode(NeutralMode.Brake);
 	}
 	
-	public void setClimbing(final boolean isClimbing) {
-		if(isClimbing) {
-			climberLeft.set(Constants.CLIMBER_SPEED);
-		}else {
-			climberLeft.set(0.0);
-		}
+	public void climb() {
+		climberLeft.set(Constants.CLIMBER_SPEED);
+		climberRight.set(Constants.CLIMBER_SPEED);
+	}
+	
+	public void stopClimbing() {
+		climberLeft.set(Constants.CLIMBER_SPEED);
+		climberRight.set(Constants.CLIMBER_SPEED);
+	}
+	
+	public void scissorUp() {
+		scissor.set(Constants.SCISSOR_UPPER_SPEED);
+	}
+	
+	public void scissorDown() {
+		scissor.set(Constants.SCISSOR_LOWER_SPEED);
+	}
+	
+	public void stopScissor() {
+		scissor.set(0.0);
 	}
 }

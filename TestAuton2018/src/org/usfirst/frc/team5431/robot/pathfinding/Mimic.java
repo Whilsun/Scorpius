@@ -12,20 +12,24 @@ import java.util.ArrayList;
 
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
+import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
 
 public class Mimic {
 	public static final String mimicFile = "/media/sda1/%s.mimic";
-	public static final String formatString = "%.2f,%.2f,%.2f,%.4f,%.4f\n"; //LEFT ENCODER, RIGHT ENCODER, GYRO ANGLE, LEFT POWER, RIGHT POWER
+	public static final String formatString = "%.2f,%.2f,%.2f,%.4f,%.4f,%d,%d\n"; //LEFT ENCODER, RIGHT ENCODER, GYRO ANGLE, LEFT POWER, RIGHT POWER, HOME, SWITCH SHOOT
 	
 	public static class Stepper {
 		public double leftDistance, rightDistance, angle, leftPower, rightPower;
+		public boolean isHome, isSwitch;
 		
-		public Stepper(final double lD, final double rD, final double a, final double lP, final double rP) {
+		public Stepper(final double lD, final double rD, final double a, final double lP, final double rP, final boolean h, final boolean sw) {
 			leftDistance = lD;
 			rightDistance = rD;
 			angle = a;
 			leftPower = lP;
 			rightPower = rP;
+			isHome = h;
+			isSwitch = sw;
 		}
 		
 		public Stepper(final String toParse) {
@@ -36,6 +40,8 @@ public class Mimic {
 				angle = getDouble(parts[2]);
 				leftPower = getDouble(parts[3]);
 				rightPower = getDouble(parts[4]);
+				isHome = getBoolean(parts[5]); 
+				isSwitch = getBoolean(parts[6]);
 			} catch (Exception e) {
 				Titan.ee("MimicParse", e);
 			}
@@ -45,7 +51,7 @@ public class Mimic {
 			return getDouble(data, 0.0);
 		}
 		
-		private static final double getDouble(final String data, double defaultValue) {
+		private static final double getDouble(final String data, final double defaultValue) {
 			try {
 				return Double.parseDouble(data);
 			} catch (Throwable e) {
@@ -53,13 +59,27 @@ public class Mimic {
 			}
 		}
 		
+		private static final boolean getBoolean(final String data) {
+			return getBoolean(data, false);
+		}
+		
+		private static final boolean getBoolean(final String data, final boolean defaultValue) {
+			try {
+				return Integer.parseInt(data) == 1;
+			} catch (Throwable e) {
+				return defaultValue;
+			}
+		}
+		
 		public String toString() {
-			return String.format(formatString, leftDistance, rightDistance, angle, leftPower, rightPower);
+			return String.format(formatString, leftDistance, rightDistance, angle, leftPower, rightPower, (isHome) ? 1 : 0, (isSwitch) ? 1 : 0);
 		}
 	}
 	
 	public static class Observer {
 		private static FileOutputStream log = null;
+		private static boolean homed = false;
+		private static boolean switched = false;
 		private static boolean saved = true;
 		
 		public static void prepare(final String fileName) {
@@ -83,7 +103,25 @@ public class Mimic {
 				final float angle = robot.getDriveBase().getNavx().getYaw();
 				final double leftPower = driveVals[0];
 				final double rightPower = driveVals[1];
-				if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower).toString().getBytes(StandardCharsets.US_ASCII));
+				boolean home = robot.getTeleop().getXbox().getRawButton(Titan.Xbox.Button.START);
+				boolean switchShoot = robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.TRIGGER_RIGHT) > 0.5;
+				
+				if(home && !homed) {
+					robot.getDriveBase().setHome();
+				}
+				
+				if(switchShoot && !switched) {
+					robot.getIntake().shootCube();
+					switchShoot = true;
+				} else switchShoot = false;
+				
+				//@TODO FIX THE CRAP
+				if(robot.getIntake().getState() == IntakeState.STAY_UP || switchShoot) {
+					if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower, home, switchShoot).toString().getBytes(StandardCharsets.US_ASCII));	
+				}
+				
+				homed = home;
+				switched = switchShoot;
 			} catch (Exception e) {
 				Titan.ee("Mimic", e);
 			}

@@ -5,28 +5,33 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Namespace for TitanUtil
  */
 public final class Titan {
 	public static boolean DEBUG = true;
+
 	private Titan() {
 	}
-	
+
 	/* Log information */
 	public static void l(String base, Object... a) {
-		if(DEBUG) System.out.println(String.format(base, a));
+		if (DEBUG)
+			System.out.println(String.format(base, a));
 	}
-	
+
 	/* Log error */
 	public static void e(String base, Object... a) {
-		if(DEBUG) System.err.println(String.format(base, a));
+		if (DEBUG)
+			System.err.println(String.format(base, a));
 	}
-	
+
 	/* Exception error */
 	public static void ee(String namespace, Exception e) {
-		if(DEBUG) e("%s: %s", namespace, e.getMessage());
+		if (DEBUG)
+			e("%s: %s", namespace, e.getMessage());
 	}
 
 	/**
@@ -131,10 +136,6 @@ public final class Titan {
 			return getRawButton(8);
 		}
 
-		public double getRawAxis(final int axis) {
-			return getRawAxis(axis);
-		}
-		
 		public double getRawAxis(final Axis axis) {
 			return getRawAxis(axis.ordinal());
 		}
@@ -174,6 +175,10 @@ public final class Titan {
 			}
 			prevButton = buttonState ? 1 : 0;
 			return isToggled;
+		}
+
+		public void setState(final boolean state) {
+			isToggled = state;
 		}
 	}
 
@@ -270,8 +275,10 @@ public final class Titan {
 	}
 
 	public static class GameData {
+		private String gameData = "";
+
 		public static enum Position {
-			LEFT, RIGHT;
+			LEFT, RIGHT, ERROR;
 
 			static Position fromGameData(final char value) {
 				if (value == 'L') {
@@ -279,28 +286,50 @@ public final class Titan {
 				} else if (value == 'R') {
 					return Position.RIGHT;
 				} else {
-					throw new IllegalArgumentException("Illegal Game Data Character: " + value);
+					return Position.ERROR;
 				}
 			}
 		}
-		
+
 		public static enum FieldObject {
 			SWITCH, SCALE, OPPONENT_SWITCH
 		}
-		
+
 		public static interface SideChooser {
 			void left();
+
 			void right();
+		}
+
+		public static interface ErrorChooser {
+			void noData();
 		}
 
 		private Position allianceSwitch, scale, opponentSwitch;
 		private FieldObject selectedObject;
+		private ErrorChooser errorChooser = null;
+
+		public boolean hasData() {
+			return hasData("EEE");
+		}
 		
-		
+		public String getString() {
+			return gameData;
+		}
+
+		public boolean hasData(String defaultValue) {
+			gameData = DriverStation.getInstance().getGameSpecificMessage();
+			if (gameData != null) {
+				if (gameData.length() == 3)
+					return true;
+			}
+			gameData = defaultValue;
+			return false;
+		}
+
 		public void init() {
-			final String gameData = DriverStation.getInstance().getGameSpecificMessage();
-			if (gameData.length() != 3) {
-				throw new IllegalArgumentException("Illegal Game Data String: " + gameData);
+			if (!hasData()) {
+				SmartDashboard.putString("Error", "Failed to get game specific message");
 			}
 			allianceSwitch = Position.fromGameData(gameData.charAt(0));
 			scale = Position.fromGameData(gameData.charAt(1));
@@ -318,34 +347,56 @@ public final class Titan {
 		public Position getAllianceSwitch() {
 			return allianceSwitch;
 		}
-		
+
 		public void setSelectedObject(FieldObject fObject) {
 			selectedObject = fObject;
 		}
-		
+
+		public void setNoDataRun(ErrorChooser errChsr) {
+			errorChooser = errChsr;
+		}
+
 		public void runSide(SideChooser toRun) {
-			switch(selectedObject) {
+			switch (selectedObject) {
 			case SWITCH:
-				if(getAllianceSwitch() == Position.LEFT) toRun.left();
-				else toRun.right();
+				if (getAllianceSwitch() == Position.ERROR) {
+					errorChooser.noData();
+					return;
+				}
+				if (getAllianceSwitch() == Position.LEFT)
+					toRun.left();
+				else
+					toRun.right();
 				break;
 			case SCALE:
-				if(getScale() == Position.LEFT) toRun.left();
-				else toRun.right();
+				if (getScale() == Position.ERROR) {
+					errorChooser.noData();
+					return;
+				}
+				if (getScale() == Position.LEFT)
+					toRun.left();
+				else
+					toRun.right();
 				break;
 			case OPPONENT_SWITCH:
-				if(getOpponentSwitch() == Position.LEFT) toRun.left();
-				else toRun.right();
+				if (getOpponentSwitch() == Position.ERROR) {
+					errorChooser.noData();
+					return;
+				}
+				if (getOpponentSwitch() == Position.LEFT)
+					toRun.left();
+				else
+					toRun.right();
 				break;
 			}
 		}
 	}
 
 	public static boolean approxEquals(final double a, final double b, final double epsilon) {
-		if(a == b) {
+		if (a == b) {
 			return true;
 		}
-		
+
 		return Math.abs(a - b) < epsilon;
 	}
 }

@@ -6,6 +6,7 @@ import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
+import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
@@ -54,12 +55,23 @@ public class MimicStep extends Step {
 		boolean nextStep = true;
 		try {
 			final Stepper step = steps.get(currentStep);
-			final double power = (step.leftPower + step.rightPower) / 2.0;
 			
-			robot.getDriveBase().updateStepResults(power, step.angle);
-			if(!robot.getDriveBase().hasTravelled(step.leftDistance) && !(Math.abs(power) < Constants.AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED)) {
-				Titan.l("Mimic is falling behind!");
-				nextStep = false;
+			if(step.isHome) {
+				robot.getDriveBase().reset(); //Do not call setHome because that disables PID
+			} else if(step.isSwitch) {
+				robot.getIntake().shootCube();
+				if(robot.getIntake().getState() != IntakeState.STAY_UP) {
+					skippedSteps = 0;
+					nextStep = false;
+				}
+			} else {
+				final double power = (step.leftPower + step.rightPower) / 2.0;
+				
+				robot.getDriveBase().updateStepResults(power, step.angle);
+				if(!robot.getDriveBase().hasTravelled(step.leftDistance) && !(Math.abs(power) < Constants.AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED)) {
+					Titan.l("Mimic is falling behind!");
+					nextStep = false;
+				}
 			}
 		} catch (IndexOutOfBoundsException e) {}
 		if(nextStep || skippedSteps > 5) {
