@@ -1,8 +1,9 @@
 package org.usfirst.frc.team5431.robot.auton;
 
 import org.usfirst.frc.team5431.robot.Robot;
+import org.usfirst.frc.team5431.robot.Titan;
 
-public class GrabCubeStep extends Step{
+public class GrabCubeCommand extends Titan.Command<Robot>{
 
 	@Override
 	public void init(final Robot robot) {
@@ -11,9 +12,9 @@ public class GrabCubeStep extends Step{
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		// TODO Auto-generated method stub
-		return StepResult.COMPLETE;
+		return CommandResult.COMPLETE;
 	}
 
 	@Override

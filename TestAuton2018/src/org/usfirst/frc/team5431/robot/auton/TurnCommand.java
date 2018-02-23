@@ -7,7 +7,7 @@ import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 
-public class TurnStep extends Step {
+public class TurnCommand extends Titan.Command<Robot> {
 	private static final double minimumDegree = 20.0;
 	private static final double degreeChunkSize = 90.0;
 	private double degrees;
@@ -15,7 +15,7 @@ public class TurnStep extends Step {
 	private List<Double> degreeChunks = new ArrayList<Double>();
 	private int currentChunk = 0;
 	
-	public TurnStep(final double deg) { // TODO MAKE THE TURNING MORE SMOOTH BY OVERRIDING THE NAVX ANGLE WITH THE CURRENT MAXIMUM CHUNK! BECAUSE THE BOT SLOWS DOWN AND STOPS...
+	public TurnCommand(final double deg) { // TODO MAKE THE TURNING MORE SMOOTH BY OVERRIDING THE NAVX ANGLE WITH THE CURRENT MAXIMUM CHUNK! BECAUSE THE BOT SLOWS DOWN AND STOPS...
 		degrees = deg;
 		name = "TurnStep";
 		properties = String.format("Angle %.2f", degrees);
@@ -50,16 +50,16 @@ public class TurnStep extends Step {
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		final double turnDeg = (double) degreeChunks.get(currentChunk);
 		if(robot.getDriveBase().hasTurned(turnDeg)) {
 			currentChunk++;
-			if((currentChunk + 1) > degreeChunks.size()) return StepResult.COMPLETE;
+			if((currentChunk + 1) > degreeChunks.size()) return CommandResult.COMPLETE;
 			final double newTurnDeg = degreeChunks.get(currentChunk);
 			robot.getDriveBase().disableAllPID();
 			robot.getDriveBase().turnPID(newTurnDeg, DriveBase.TitanPIDSource.NAVX);
 		}
-		return StepResult.IN_PROGRESS;
+		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override

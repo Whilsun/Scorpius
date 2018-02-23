@@ -22,16 +22,18 @@ import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
 
 public class Intake {
 	public enum IntakeState {
-		CAPTURE, SHOOT, SHOOT_PROGRESS, STAY_DOWN, DOWN_RELEASE, STAY_UP;
+		CAPTURE, SHOOT, SHOOT_PROGRESS, DOWN_RELEASE, STAY_DOWN, STAY_UP, SHOOT_SAFE;
 	}
 	
 	private final WPI_TalonSRX intakeLeft, intakeRight, intakePincher, intakeUpLeft, intakeUpRight;
 	private final DigitalInput intakeStop, cubeDetector;
 	private IntakeState state = IntakeState.STAY_UP;
 	private boolean captureComplete = false;
+	private boolean isCapturePressed = false;
 	private long cubeStart = 0;
 	private long cubeShoot = 0;
 	private long moveStart = 0;
+	private boolean captureDirection = false;
 
 	private SpeedControllerGroup intake;
 
@@ -119,6 +121,8 @@ public class Intake {
 		// 0);
 		intakeUpRight.configForwardSoftLimitEnable(false, 0);
 		intakeUpRight.configReverseSoftLimitEnable(false, 0);
+		intakeUpLeft.configForwardSoftLimitEnable(false, 0);
+		intakeUpLeft.configReverseSoftLimitEnable(false, 0);
 		intakeUpRight.getSensorCollection().setQuadraturePosition(0, 0);
 
 		intakeUpLeft.configForwardSoftLimitEnable(false, 0);
@@ -141,12 +145,27 @@ public class Intake {
 		intakeStop = new DigitalInput(0);
 		cubeDetector = new DigitalInput(3);
 		
-		if(isDown()) {
-			intakeUpRight.getSensorCollection().setQuadraturePosition(0, 0);
-		} else {
-			intakeUpRight.getSensorCollection().setQuadraturePosition(Constants.ENCODER_INTAKE_UP_POSITION, 0);
-		}
 		
+		//Set the current encoder pos
+		recalibrate();
+	}
+	
+	public void recalibrate() {
+		if(isDown()) {
+			setUpPos(0);
+			stayDown();
+		} else {
+			setUpPos(Constants.ENCODER_INTAKE_UP_POSITION);
+			stayUp();
+		}
+	}
+	
+	public void stayInPosition() {
+		if(isDown()) {
+			stayDown();
+		} else if(isUp()) {
+			stayUp();
+		}
 	}
 
 	public boolean isClosed() {
@@ -162,7 +181,11 @@ public class Intake {
 	}
 
 	public double getUpPos() {
-		return intakeUpRight.getSensorCollection().getQuadraturePosition();
+		return -(intakeUpRight.getSensorCollection().getQuadraturePosition());
+	}
+	
+	public void setUpPos(int position) {
+		intakeUpRight.getSensorCollection().setQuadraturePosition(-position, 0);
 	}
 
 	public boolean isUp() {
@@ -187,9 +210,9 @@ public class Intake {
 
 	public void setUpPosition() {
 		if(!isDown()) {
-			intakeUpRight.getSensorCollection().setQuadraturePosition(Constants.ENCODER_AUTONOMOUS_START_POSITION, 0);
+			setUpPos(Constants.ENCODER_AUTONOMOUS_START_POSITION);
 		} else {
-			intakeUpRight.getSensorCollection().setQuadraturePosition(0, 0);
+			setUpPos(0);
 		}
 	}
 
@@ -203,7 +226,7 @@ public class Intake {
 	}
 
 	public void intakeSlow() {
-		intake.set(0.175);
+		intake.set(0.27);
 	}
 
 	public void intakeHold() {
@@ -212,6 +235,10 @@ public class Intake {
 
 	public void intakeReverse() {
 		intake.set(-0.6);
+	}
+	
+	public void intakeReverseSlow() {
+		intake.set(-0.2);
 	}
 
 	public void intakeShoot() {
@@ -250,6 +277,10 @@ public class Intake {
 		// else pinch(0.05);
 		intakePincher.set(0.25);
 	}
+	
+	public void releaseFast() {
+		intakePincher.set(0.5);
+	}
 
 	public void stopPinch() {
 		intakePincher.set(0.0);
@@ -278,7 +309,7 @@ public class Intake {
 			if(isBelowSwitch()) {
 				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.25, 0.1);
 			} else {
-				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 0.45, 0.1);
+				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.5, 0.025); //0.45, 0.05);
 			}
 		} else {
 			stopUp();
@@ -287,7 +318,7 @@ public class Intake {
 	
 	public void goShootSafe() {
 		if(!isBelowShootSafe()) {
-			goTo(Constants.ENCODER_INTAKE_SAFE_SHOOT_POSITION, 0.45, 0.025);
+			goTo(Constants.ENCODER_INTAKE_SAFE_SHOOT_POSITION, 1.25, 0.125);
 		}
 	}
 
@@ -303,7 +334,7 @@ public class Intake {
 		if (isBelowSwitch()) {
 			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 1.25, 0.025);
 		} else {
-			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.45, 0.135);
+			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.35, 0.15);
 		}
 	}
 
@@ -313,13 +344,9 @@ public class Intake {
 	}
 
 	public void captureCube() {
+		isCapturePressed = true;
+		if(cubeStart == 0) cubeStart = System.currentTimeMillis();
 		state = IntakeState.CAPTURE;
-		
-		if(!isDown() && !isUp()) {
-			cubeStart = 1000;
-		} else {
-			cubeStart = 0;
-		}
 	}
 
 	public void stayUp() {
@@ -332,6 +359,10 @@ public class Intake {
 	
 	public void downRelease() {
 		state = IntakeState.DOWN_RELEASE;
+	}
+	
+	public void shootSafe() {
+		state = IntakeState.SHOOT_SAFE;
 	}
 	
 	public boolean isCaptured() {
@@ -355,8 +386,8 @@ public class Intake {
 		SmartDashboard.putBoolean("HasCube", hasCube());
 		SmartDashboard.putBoolean("AtSwitch", isSwitch());
 		SmartDashboard.putNumber("UpEncoder", getUpPos());
-		if (isDown())
-			intakeUpRight.getSensorCollection().setQuadraturePosition(0, 0);
+		SmartDashboard.putNumber("PinchEncoder", intakePincher.getSensorCollection().getQuadraturePosition());
+		if (isDown()) setUpPos(0);
 
 		switch(state) {
 		case SHOOT:
@@ -405,51 +436,48 @@ public class Intake {
 		case CAPTURE:
 			SmartDashboard.putBoolean("SeekingCube", true);
 			if (hasCube()) { // There's a cube in the proximity
-				if (cubeStart == 0) {
-					cubeStart = System.currentTimeMillis();
-					captureComplete = false;
-				}
-
-				if ((System.currentTimeMillis() - cubeStart) < 100) { // Pinch hard and fast for 500 milliseconds
+				final long timeDiff = System.currentTimeMillis() - cubeStart;
+				if (timeDiff < 500 || isCapturePressed) { // Pinch hard and fast for 500 milliseconds
 					intakeFast(); // Quickly suck the cube to the back of the intake
-					pinchHard(); // Pinch harder to straigten out the cube
-				} else {
+					if(Titan.approxEquals(timeDiff % 800, 0, 10)) {
+						captureDirection = !captureDirection;
+					}
+					
+					if(captureDirection) {
+						release(); // Pinch harder to straigten out the cube
+					} else {
+						pinchHard();
+					}
+				} else if(timeDiff > 500 && timeDiff < 1000 &&!isCapturePressed) {
 					intakeSlow(); // Intake the cube so that it sits flush with the back of the intake
 					pinchSoft(); // Pinch to hold the cube while it's going up
-
-					// If the catapult isn't lowered then lower it so
-					if (!robot.getCatapult().isLowered() && moveStart == 0) {
-						moveStart = System.currentTimeMillis();
-						robot.getCatapult().lowerCatapult();
-					}
-
-					if ((System.currentTimeMillis() - moveStart) > 100 || robot.getCatapult().isLowered()) { // Only lift the intake up when we know the
-																			// catapult has had enough time to start
-																			// pulling down
-						goUp(); //Lift the intake up
-						if(isUp()) {
-							cubeStart = 0; //Reset the timer
-							state = IntakeState.STAY_UP;
-							captureComplete = true;
-							intakeHold();
-							stopUp();
-						}
-					}
+				} else if(timeDiff > 500 && (captureDirection) && !isCapturePressed) {
+					intakeSlow();
+					pinchHard();
+				} else {
+					intakeHold();
+					pinchHold();
+					cubeStart = 0;
+					state = IntakeState.STAY_DOWN;
 				}
+				
+				//Reset the button hold
+				isCapturePressed = false;
 			} else {
-				cubeStart = 0; // Reset the cube timer
-				goDown();
+				goDown(); //no pda
 				intakeFast(); // Try to intake everything
 				release(); // Release the pincher
 			}
 			break;
+			
 		case STAY_UP:
 			SmartDashboard.putBoolean("SeekingCube", false);
 			cubeStart = 0; // Reset the cube start
+			cubeShoot = 0;
 			if (!robot.getCatapult().isLowered())
 				moveStart = 0; // Reset the lower start if the catapult isn't already lowered
-			goUp();
 			if(isUp()) { //If it's in the catapult then hold onto the cube
+				goUp();
 				pinchHold();
 				if(hasCube()) {
 					intakeHold();
@@ -457,8 +485,34 @@ public class Intake {
 					intakeStop();
 				}
 			} else {
-				intakeStop(); // Stop rotating
-				pinchSoft(); // Pinch it slowly to reset the encoder
+				// If the catapult isn't lowered then lower it so
+				if (!robot.getCatapult().isLowered() && moveStart == 0) {
+					moveStart = System.currentTimeMillis();
+					robot.getCatapult().lowerCatapult();
+				}
+
+				if ((System.currentTimeMillis() - moveStart) > 100 && robot.getCatapult().isLowered()) { // Only lift the intake up when we know the
+																		// catapult has had enough time to start
+																		// pulling down
+					goUp(); //Lift the intake up
+					if(isUp()) {
+						cubeStart = 0; //Reset the timer
+						moveStart = 0;
+						state = IntakeState.STAY_UP;
+						captureComplete = true;
+						intakeHold();
+						stopUp();
+					}
+				}
+				
+				if(hasCube()) {	
+					intakeSlow();
+					pinchSoft();
+				} else {
+					goUp();
+					intakeStop(); // Stop rotating
+					pinchSoft(); // Pinch it slowly to reset the encoder
+				}
 			}
 			break;
 		case STAY_DOWN:
@@ -485,6 +539,23 @@ public class Intake {
 			} else {
 				intakeReverse();
 				pinchSoft();
+			}
+			break;
+		case SHOOT_SAFE:
+			if(cubeShoot == 0) {
+				cubeShoot = System.currentTimeMillis();
+			}
+			
+			intakeReverseSlow();
+			if((System.currentTimeMillis() - cubeShoot) < 400) {
+				releaseFast();
+			} else {
+				release();
+				goShootSafe();	
+			}
+			
+			if(isBelowShootSafe()) {
+				cubeShoot = 0;
 			}
 			break;
 		}

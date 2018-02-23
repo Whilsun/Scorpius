@@ -17,47 +17,57 @@ public final class Teleop {
 	}
 
 	public final void periodicDrive(final Robot robot) {
-		robot.getDriveBase().drive(-driver.getRawAxis(Titan.Xbox.Axis.LEFT_Y), -driver.getRawAxis(Titan.Xbox.Axis.RIGHT_Y));
+		robot.getDriveBase().drive(-driver.getRawAxis(Titan.Xbox.Axis.LEFT_Y),
+				-driver.getRawAxis(Titan.Xbox.Axis.RIGHT_Y));
 	}
 
 	public final double[] periodicPathfindingDrive(final Robot robot) {
-		final double vals[] = { -(driver.getRawAxis(Titan.Xbox.Axis.LEFT_Y)), -(driver.getRawAxis(Titan.Xbox.Axis.RIGHT_Y)) };
+		final double vals[] = { -(driver.getRawAxis(Titan.Xbox.Axis.LEFT_Y)),
+				-(driver.getRawAxis(Titan.Xbox.Axis.RIGHT_Y)) };
 		robot.getDriveBase().drive(vals[0], vals[1]);
 		return vals;
 	}
 
 	public final void periodicClimb(final Robot robot) {
-		if(driver.getRawButton(Button.B)) {
+		if (driver.getRawButton(Button.B)) {
 			robot.getClimber().climb();
-		}else {
+		} else {
 			robot.getClimber().stopClimbing();
 		}
-		
-		if(driver.getRawButton(Button.Y)) {
-			robot.getClimber().scissorUp();
-		}else if(driver.getRawButton(Button.X)){
+
+		if (driver.getRawButton(Button.Y)) {
+			robot.getClimber().scissorUpFast();
+		} else if (driver.getRawButton(Button.X)) {
+			robot.getClimber().scissorUpSlow();
+		} else if(driver.getRawButton(Button.A)) {
 			robot.getClimber().scissorDown();
-		}else {
+		} else {
 			robot.getClimber().stopScissor();
 		}
 	}
-	
+
 	public final void periodicIntake(final Robot robot) {
 		if (operator.getRawAxis(Axis.TRIGGER_RIGHT) > 0.5) {
-			if (robot.getIntake().isCaptured())
-				cubeCaptureToggle.setState(false);
-			else
-				robot.getIntake().captureCube();
+			robot.getIntake().captureCube();
 		}
-		
+
 		if (operator.getRawAxis(Axis.TRIGGER_LEFT) > 0.5) {
-			cubeCaptureToggle.setState(false);
 			robot.getIntake().shootCube();
 		}
-		
-		if(operator.getRawButton(Button.BUMPER_L)) {
-			
+
+		if (operator.getRawButton(Button.BUMPER_L)) {
+			robot.getIntake().downRelease();
 		}
+		
+		if(operator.getRawButton(Button.A)) {
+			robot.getIntake().stayUp();
+		}
+		
+		if(operator.getRawButton(Button.B)) {
+			robot.getIntake().stayDown();
+		}
+		
+		//if(operator.getRawButton(button))
 
 		/*
 		 * if(operator.getRawAxis(Axis.TRIGGER_RIGHT) > 0.5) {

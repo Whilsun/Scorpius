@@ -28,16 +28,20 @@ public class Climber {
 	}
 	
 	public void stopClimbing() {
-		climberLeft.set(Constants.CLIMBER_SPEED);
-		climberRight.set(Constants.CLIMBER_SPEED);
+		climberLeft.set(0.0);
+		climberRight.set(0.0);
 	}
 	
-	public void scissorUp() {
+	public void scissorUpFast() {
 		scissor.set(Constants.SCISSOR_UPPER_SPEED);
 	}
 	
-	public void scissorDown() {
+	public void scissorUpSlow() {
 		scissor.set(Constants.SCISSOR_LOWER_SPEED);
+	}
+	
+	public void scissorDown() {
+		scissor.set(Constants.SCISSOR_REVERSE_SPEED);
 	}
 	
 	public void stopScissor() {

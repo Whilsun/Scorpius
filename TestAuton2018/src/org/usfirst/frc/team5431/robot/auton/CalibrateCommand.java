@@ -3,23 +3,23 @@ package org.usfirst.frc.team5431.robot.auton;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 
-public class CalibrateStep extends Step {
-	public CalibrateStep() {
+public class CalibrateCommand extends Titan.Command<Robot> {
+	public CalibrateCommand() {
 		name = "CalibrateStep";
 		properties = "Intake and Gamedata calibration";
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		if(getElapsed() > 200) {
-			return StepResult.COMPLETE; //Timeout
+			return CommandResult.COMPLETE; //Timeout
 		}
 		
-		if(robot.getGameData().hasData()) return StepResult.COMPLETE;
+		if(robot.getGameData().hasData()) return CommandResult.COMPLETE;
 		robot.getIntake().pinchSoft();
 		robot.getDriveBase().drive(0.0, 0.0);
 		Titan.l("Calibrating... %d (Current game data: %s)", getElapsed(), robot.getGameData().getString());
-		return StepResult.IN_PROGRESS;
+		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override

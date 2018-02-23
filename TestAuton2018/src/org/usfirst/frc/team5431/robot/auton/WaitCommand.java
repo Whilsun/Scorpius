@@ -1,13 +1,14 @@
 package org.usfirst.frc.team5431.robot.auton;
 
 import org.usfirst.frc.team5431.robot.Robot;
+import org.usfirst.frc.team5431.robot.Titan;
 
-public class WaitStep extends Step {
+public class WaitCommand extends Titan.Command<Robot> {
 
 	private final long durationMS;
 	private long startTime;
 	
-	public WaitStep(final long ms) {
+	public WaitCommand(final long ms) {
 		name = "WaitStep";
 		properties = String.format("Millis %d", ms);
 		durationMS = ms;
@@ -19,12 +20,12 @@ public class WaitStep extends Step {
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		if (System.currentTimeMillis() >= startTime + durationMS) {
-			return StepResult.COMPLETE;
+			return CommandResult.COMPLETE;
 		}
 
-		return StepResult.IN_PROGRESS;
+		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override

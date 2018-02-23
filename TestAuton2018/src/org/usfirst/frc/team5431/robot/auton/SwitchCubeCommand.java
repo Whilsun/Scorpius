@@ -1,9 +1,10 @@
 package org.usfirst.frc.team5431.robot.auton;
 
 import org.usfirst.frc.team5431.robot.Robot;
+import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
 
-public class SwitchCubeStep extends Step{
+public class SwitchCubeCommand extends Titan.Command<Robot>{
 	@Override
 	public void init(final Robot robot) {
 		name = "SwitchCubeStep";
@@ -11,15 +12,17 @@ public class SwitchCubeStep extends Step{
 		
 		//Start the intake shoot state machine
 		robot.getIntake().shootCube();
+		robot.getDriveBase().drive(-0.15, -0.15);
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		//Check to see if the state machine is done
+		robot.getDriveBase().drive(-0.15, -0.15);
 		if(robot.getIntake().getState() == IntakeState.STAY_UP) {
-			return StepResult.COMPLETE;
+			return CommandResult.COMPLETE;
 		}
-		return StepResult.IN_PROGRESS;
+		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override

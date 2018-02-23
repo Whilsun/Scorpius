@@ -2,10 +2,12 @@ package org.usfirst.frc.team5431.robot.components;
 
 import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
+import org.usfirst.frc.team5431.robot.Titan;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -22,6 +24,7 @@ public class Catapult {
 	private boolean lowering = false;
 	private boolean shooting = false;
 	private long shootStart = 0;
+	private int triesTaken = 0;
 
 	public Catapult() {
 		catapultLeft = new WPI_TalonSRX(Constants.TALON_CATAPULT_LEFT_ID);
@@ -30,6 +33,8 @@ public class Catapult {
 		// Inverted or not
 		catapultLeft.setInverted(Constants.TALON_CATAPULT_LEFT_INVERTED);
 		catapultRight.setInverted(Constants.TALON_CATAPULT_RIGHT_INVERTED);
+		catapultLeft.setNeutralMode(NeutralMode.Coast);
+		catapultRight.setNeutralMode(NeutralMode.Coast);
 
 		// Follower mode
 		catapultRight.set(ControlMode.Follower, Constants.TALON_CATAPULT_LEFT_ID);
@@ -83,29 +88,48 @@ public class Catapult {
 			}
 			catapultLeft.set(Constants.CATAPULT_LOWER_SPEED);
 			catapultRight.set(Constants.CATAPULT_LOWER_SPEED);
-		} else if (shooting) {
-			if(!robot.getIntake().isBelowShootSafe()) {
-				robot.getIntake().goShootSafe(); //Go to the shoot safe position
-			} else {
-				final long timeDisp = System.currentTimeMillis() - shootStart;
-				if(timeDisp >= 500 && timeDisp < 800) {
-					shooterOne.set(false);
-					shooterTwo.set(true);
-				} else if(timeDisp > 800){
-					shooterOne.set(false);
-					shooterTwo.set(false);
-					
-					if(!isLowered()) {
-						lowerCatapult();
-					} else {
-						shooting = false;
-						robot.getIntake().stayUp();
-					}
-				}
-			}
 		} else {
 			catapultLeft.set(0.0);
 			catapultRight.set(0.0);
+		}
+		
+		if (shooting && !lowering) {
+			if(!robot.getIntake().isBelowShootSafe()) {
+				robot.getIntake().shootSafe();
+			} else {
+				final long timeDisp = System.currentTimeMillis() - shootStart;
+				if(timeDisp >= 100 && timeDisp < 350) {
+					shooterOne.set(false);
+					shooterTwo.set(true);
+					Titan.l("Shooting...");
+				} else if(timeDisp >= 350 && timeDisp < 450) {
+					catapultLeft.overrideLimitSwitchesEnable(true);
+					catapultRight.overrideLimitSwitchesEnable(true);
+					catapultLeft.set(Constants.CATAPULT_LOWER_SPEED);
+					catapultRight.set(Constants.CATAPULT_LOWER_SPEED);
+				} else if(timeDisp >= 450 && timeDisp < 495) {
+					catapultLeft.set(-1.0);
+					catapultRight.set(-1.0);
+				} else if(timeDisp >= 480){
+					if(isLowered() && triesTaken < 5) {
+						shootStart = System.currentTimeMillis() - 348;
+						triesTaken++;
+					} else {
+						catapultLeft.overrideLimitSwitchesEnable(false);
+						catapultRight.overrideLimitSwitchesEnable(false);
+						shooterOne.set(false);
+						shooterTwo.set(false);
+						triesTaken = 0; //Reset the tries taken variable
+						Titan.l("Waiting...");
+						if(!isLowered()) {
+							lowerCatapult();
+						} else {
+							shooting = false;
+							//robot.getIntake().stayUp();
+						}
+					}
+				}
+			}
 		}
 	}
 

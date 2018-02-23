@@ -1,5 +1,12 @@
 package org.usfirst.frc.team5431.robot;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import org.usfirst.frc.team5431.robot.Titan.Command.CommandResult;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.AnalogInput;
@@ -79,6 +86,14 @@ public final class Titan {
 				return val;
 			}
 		}
+
+		public double getRawAxis(final Enum<?> value) {
+			return getRawAxis(value.ordinal());
+		}
+
+		public boolean getRawButton(final Enum<?> value) {
+			return getRawButton(value.ordinal());
+		}
 	}
 
 	public static class FSi6S extends Titan.Joystick {
@@ -135,14 +150,9 @@ public final class Titan {
 		public boolean getBackRight() {
 			return getRawButton(8);
 		}
-
-		public double getRawAxis(final Axis axis) {
-			return getRawAxis(axis.ordinal());
-		}
 	}
 
 	public static class Xbox extends Titan.Joystick {
-
 		public static enum Button {
 			// ordered correctly, so ordinal reflects real mapping
 			A, B, X, Y, BUMPER_L, BUMPER_R, BACK, START;
@@ -155,13 +165,39 @@ public final class Titan {
 		public Xbox(int port) {
 			super(port);
 		}
+	}
 
-		public boolean getRawButton(final Button but) {
-			return getRawButton(but.ordinal() + 1);
+	public static class AssignableJoystick<T> extends Titan.Joystick {
+		private final Map<Integer, Supplier<CommandQueue<T>>> assignments = new HashMap<>();
+		private final CommandQueue<T> currentQueue = new CommandQueue<>();
+
+		public AssignableJoystick(int port) {
+			super(port);
+		}
+		
+		public void periodic(final T robot) {
+			currentQueue.periodic(robot);
+		}
+		
+		@Override
+		public boolean getRawButton(final int but) {
+			final boolean value = super.getRawButton(but);
+			if(assignments.containsKey(but) && value) {
+				currentQueue.clear();
+				
+				//call the associated function from the index in the map and then add it to the queue
+				currentQueue.addAll(assignments.get(but).get());//get
+			}
+			
+			return value;
 		}
 
-		public double getRawAxis(final Axis axis) {
-			return getRawAxis(axis.ordinal());
+		public void assign(final int button, final Supplier<CommandQueue<T>> generator) {
+			assignments.put(button, generator);
+		}
+
+		public void assign(final Enum<?> button, final Supplier<CommandQueue<T>> generator) {
+			assign(button.ordinal(), generator);
 		}
 	}
 
@@ -274,6 +310,97 @@ public final class Titan {
 		}
 	}
 
+	public static abstract class Command<T> {
+		public String name = "Command";
+		public String properties = "None";
+		public long startTime = 0;
+
+		public static enum CommandResult {
+			IN_PROGRESS, COMPLETE, CLEAR_QUEUE, RESTART_COMMAND
+		};
+
+		public abstract void init(final T robot);
+
+		public abstract CommandResult periodic(final T robot);
+
+		public abstract void done(final T robot);
+
+		public String getName() {
+			return name;
+		}
+
+		public String getProperties() {
+			return properties;
+		}
+
+		public void startTimer() {
+			startTime = System.currentTimeMillis();
+		}
+
+		public long getElapsed() {
+			return System.currentTimeMillis() - startTime;
+		}
+
+		public double getSecondsElapsed() {
+			return getElapsed() / 1000.0;
+		}
+	}
+
+	public static class CommandQueue<T> extends LinkedList<Command<T>> {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public void init(final T robot) {
+			// Initialize the first command
+			final Command<T> initCommand = peek();
+			if (initCommand != null) {
+				initCommand.startTimer();
+				initCommand.init(robot);
+				Titan.l("Starting with %s (%s)", initCommand.getName(), initCommand.getProperties());
+			}
+		}
+
+		/*
+		 * Returns false if there are no more steps to complete
+		 */
+		public boolean periodic(final T robot) {
+			if (isEmpty()) {
+				return false;
+			}
+
+			final Command<T> command = peek();
+			final CommandResult result = command.periodic(robot);
+			if (result == CommandResult.IN_PROGRESS) {
+				return true;
+			} else {
+				final double secondsElapsed = command.getSecondsElapsed();
+				Titan.l("Finished %s (Seconds: %.2f)", command.getName(), secondsElapsed);
+				command.done(robot);
+				if (result == CommandResult.COMPLETE) {
+					remove();
+					final Command<T> nextCommand = peek();
+					if (nextCommand != null) {
+						nextCommand.startTimer();
+						nextCommand.init(robot);
+						Titan.l("Starting %s (%s)", nextCommand.getName(), nextCommand.getProperties());
+					} else {
+						return false;
+					}
+				} else if (result == CommandResult.CLEAR_QUEUE) {
+					clear();
+					Titan.l("Cleared queue");
+				} else if (result == CommandResult.RESTART_COMMAND) {
+					command.startTimer();
+					command.init(robot);
+				}
+			}
+
+			return true;
+		}
+	}
+
 	public static class GameData {
 		private String gameData = "";
 
@@ -312,7 +439,7 @@ public final class Titan {
 		public boolean hasData() {
 			return hasData("EEE");
 		}
-		
+
 		public String getString() {
 			return gameData;
 		}

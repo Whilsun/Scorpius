@@ -9,11 +9,11 @@ import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
 import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
 import org.usfirst.frc.team5431.robot.Robot.AutonPosition;
 
-public class BuildAutonomousStep extends Step {
+public class BuildAutonomousCommand extends Titan.Command<Robot> {
 	private final AutonPriority priority;
 	private final AutonPosition position;
 	
-	public BuildAutonomousStep(final AutonPriority pri, final AutonPosition pos) {
+	public BuildAutonomousCommand(final AutonPriority pri, final AutonPosition pos) {
 		name = "BuildAutonomousStep ";
 		properties = "Build the autonomous based off of the game data";
 		
@@ -22,8 +22,8 @@ public class BuildAutonomousStep extends Step {
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
-		return StepResult.COMPLETE;
+	public CommandResult periodic(final Robot robot) {
+		return CommandResult.COMPLETE;
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class BuildAutonomousStep extends Step {
 	@Override
 	public void done(final Robot robot) {
 		final Titan.GameData game = robot.getGameData();
-		final Queue<Step> aSteps = robot.getAutonSteps();
+		final Titan.CommandQueue<Robot> aSteps = robot.getAutonSteps();
 		switch(position) {
 		case CENTER: {
 				switch(priority) {
@@ -44,21 +44,22 @@ public class BuildAutonomousStep extends Step {
 						game.runSide(new SideChooser() {
 							@Override
 							public void left() {
-								aSteps.add(new DriveStep(-46.5, 65.0));
-								aSteps.add(new DriveStep(-54.5, -78));
+								aSteps.add(new DriveCommand(-46.5, -65.0));
+								aSteps.add(new DriveCommand(-51, 78));
+								aSteps.add(new WaitCommand(100));
 							}
 
 							@Override
 							public void right() {
 								//aSteps.add(new DriveStep(3.0));
 								//aSteps.add(new TurnStep(35.0)); 
-								aSteps.add(new DriveStep(-60.0, 30.0));
-								aSteps.add(new DriveStep(-32.0, 70.0));
+								aSteps.add(new DriveCommand(-60.0, 30.0));
+								aSteps.add(new DriveCommand(-32.0, -70.0));
 								//aSteps.add(new TurnStep(-35.0)); 
 								//aSteps.add(new DriveStep(10.0));
 							}
 						});
-						aSteps.add(new SwitchCubeStep());
+						aSteps.add(new SwitchCubeCommand());
 					}
 					break;
 				}
@@ -79,11 +80,11 @@ public class BuildAutonomousStep extends Step {
 	
 							@Override
 							public void right() {
-								aSteps.add(new DriveStep(-88.0, 25.0));
+								aSteps.add(new DriveCommand(-88.0, 25.0));
 								if(priority == AutonPriority.SWITCH_SCALE) {
-									aSteps.add(new DriveStep(2));
-									aSteps.add(new TurnStep(180));
-									aSteps.add(new DriveStep(15));
+									aSteps.add(new DriveCommand(2));
+									aSteps.add(new TurnCommand(180));
+									aSteps.add(new DriveCommand(15));
 								}
 							}
 						});
@@ -100,9 +101,9 @@ public class BuildAutonomousStep extends Step {
 
 							@Override
 							public void right() {
-								aSteps.add(new DriveStep(-265.0));
-								aSteps.add(new WaitStep(-250));
-								aSteps.add(new TurnStep(60.0));
+								aSteps.add(new DriveCommand(-265.0));
+								aSteps.add(new WaitCommand(-250));
+								aSteps.add(new TurnCommand(60.0));
 							}							
 						});
 					}

@@ -11,7 +11,7 @@ import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-public class MimicStep extends Step {
+public class MimicCommad extends Titan.Command<Robot> {
 	public static enum Paths {
 		RIGHT_SCALE
 	}
@@ -27,7 +27,7 @@ public class MimicStep extends Step {
 	private double futureRightIntegral = 1.0;
 	private final ArrayList<Stepper> steps;
 	
-	public MimicStep(final Paths mimic) {
+	public MimicCommad(final Paths mimic) {
 		name = "PathfindingStep";
 		
 		//Collect the mimic file
@@ -51,7 +51,7 @@ public class MimicStep extends Step {
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public StepCommand periodic(final Robot robot) {
 		boolean nextStep = true;
 		try {
 			final Stepper step = steps.get(currentStep);
@@ -75,12 +75,12 @@ public class MimicStep extends Step {
 			}
 		} catch (IndexOutOfBoundsException e) {}
 		if(nextStep || skippedSteps > 5) {
-			if(((currentStep++) + 1) > steps.size()) return StepResult.COMPLETE;
+			if(((currentStep++) + 1) > steps.size()) return CommandResult.COMPLETE;
 			skippedSteps = 0;
 		} else {
 			skippedSteps++;
 		}
-		return StepResult.IN_PROGRESS;
+		return CommandResult.IN_PROGRESS;
 		/*try {
 			Stepper step = steps.get(currentStep);
 			if(!step.isDrive && !step.isTurn) {

@@ -10,7 +10,7 @@ import org.usfirst.frc.team5431.robot.pathfinding.Collector;
 import org.usfirst.frc.team5431.robot.pathfinding.Collector.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-public class PathfindingStep extends Step {
+public class PathfindingCommand extends Titan.Command<Robot> {
 	public static enum Paths {
 		RIGHT_SCALE
 	}
@@ -20,7 +20,7 @@ public class PathfindingStep extends Step {
 	private boolean wasTurn = false;
 	private final ArrayList<Stepper> steps;
 	
-	public PathfindingStep(final Paths path) {
+	public PathfindingCommand(final Paths path) {
 		name = "PathfindingStep";
 		
 		//Collect the path finding file
@@ -36,7 +36,7 @@ public class PathfindingStep extends Step {
 	}
 
 	@Override
-	public StepResult periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		boolean nextStep = true;
 		try {
 			Stepper step = steps.get(currentStep);
@@ -67,8 +67,8 @@ public class PathfindingStep extends Step {
 			wasDrive = step.isDrive;
 			wasTurn = step.isTurn;
 		} catch (IndexOutOfBoundsException e) {}
-		if(nextStep) if(((currentStep++) + 1) > steps.size()) return StepResult.COMPLETE;
-		return StepResult.IN_PROGRESS;
+		if(nextStep) if(((currentStep++) + 1) > steps.size()) return CommandResult.COMPLETE;
+		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override

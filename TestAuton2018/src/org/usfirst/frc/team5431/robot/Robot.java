@@ -10,17 +10,18 @@ package org.usfirst.frc.team5431.robot;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.usfirst.frc.team5431.robot.Titan.AssignableJoystick;
 import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
 import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
-import org.usfirst.frc.team5431.robot.auton.BuildAutonomousStep;
-import org.usfirst.frc.team5431.robot.auton.CalibrateStep;
-import org.usfirst.frc.team5431.robot.auton.DriveStep;
-import org.usfirst.frc.team5431.robot.auton.MimicStep;
-import org.usfirst.frc.team5431.robot.auton.MimicStep.Paths;
+import org.usfirst.frc.team5431.robot.auton.BuildAutonomousCommand;
+import org.usfirst.frc.team5431.robot.auton.CalibrateCommand;
+import org.usfirst.frc.team5431.robot.auton.DriveCommand;
+import org.usfirst.frc.team5431.robot.auton.MimicCommad;
+import org.usfirst.frc.team5431.robot.auton.MimicCommad.Paths;
 import org.usfirst.frc.team5431.robot.auton.Step;
 import org.usfirst.frc.team5431.robot.auton.Step.StepResult;
-import org.usfirst.frc.team5431.robot.auton.TurnStep;
-import org.usfirst.frc.team5431.robot.auton.WaitStep;
+import org.usfirst.frc.team5431.robot.auton.TurnCommand;
+import org.usfirst.frc.team5431.robot.auton.WaitCommand;
 import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
@@ -54,8 +55,8 @@ public class Robot extends IterativeRobot {
 		HEADING, TURNING, NONE
 	}
 
-	private final Queue<Step> aSteps = new LinkedList<>();
-
+	private final Titan.CommandQueue<Robot> aSteps = new Titan.CommandQueue<>();
+	
 	private final Titan.GameData game = new Titan.GameData();
 	private final SendableChooser<AutonPriority> autonChooser = new SendableChooser<AutonPriority>();
 	private final SendableChooser<PIDTest> pidChooser = new SendableChooser<PIDTest>();
@@ -112,7 +113,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		driveBase.setBrakeMode(true);
-		intake.setUpPosition();
+		intake.recalibrate(); //Try to calibrate in the up position
 		intake.stayUp();
 
 		final AutonPriority priority = autonChooser.getSelected();
@@ -124,54 +125,33 @@ public class Robot extends IterativeRobot {
 
 		// Add the wait selector to the smart dashboard
 		if (waitMillis != 0)
-			aSteps.add(new WaitStep(waitMillis));
-		aSteps.add(new CalibrateStep());
-		//aSteps.add(new BuildAutonomousStep(priority, position));
+			aSteps.add(new WaitCommand(waitMillis));
+		aSteps.add(new CalibrateCommand());
+		aSteps.add(new BuildAutonomousCommand(priority, position));
 
 		// Test the mimic code
-		aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
-
-		// Initialize the autonomous routine
-		final Step initStep = aSteps.peek();
-		if (initStep != null) {
-			initStep.startTimer();
-			initStep.init(this);
-			Titan.l("Starting with %s (%s)", initStep.getName(), initStep.getProperties());
-		}
+		//aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
+		aSteps.init(this);
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		if (!aSteps.isEmpty()) {
-			final Step step = aSteps.peek();
-			final StepResult result = step.periodic(this);
-			if (result == StepResult.COMPLETE) {
-				final double secondsElapsed = step.getSecondsElapsed();
-				Titan.l("Finished %s (Seconds: %.2f)", step.getName(), secondsElapsed);
-				step.done(this);
-				aSteps.remove();
-				final Step nextStep = aSteps.peek();
-				if (nextStep != null) {
-					nextStep.startTimer();
-					nextStep.init(this);
-					Titan.l("Starting %s (%s)", nextStep.getName(), nextStep.getProperties());
-				}
-			}
-			
-			//Update the intake and climber
-			intake.update(this);
-			catapult.update(this);
-		} else {
+		AssignableJoystick<Robot> rodgjka;
+		rodgjka.getRawAxis(Titan.Xbox.Axis.LEFT_X);
+		if (!aSteps.periodic(this)){
 			driveBase.drive(0.0, 0.0);
 		}
+		
+		//Update the intake and climber
+		intake.update(this);
+		catapult.update(this);
 	}
 
 	@Override
 	public void teleopInit() {
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
-		intake.setUpPosition();
-		intake.stayUp();
+		intake.stayInPosition();
 		// intake.tryToZero(this);
 	}
 

@@ -117,9 +117,9 @@ public final class Constants {
 
 	// Intake
 	public final static int ENCODER_AUTONOMOUS_START_POSITION = 3750;
-	public final static int ENCODER_INTAKE_UP_POSITION = 3550;
-	public final static int ENCODER_INTAKE_SWITCH_POSITION = 2800;
-	public final static int ENCODER_INTAKE_SAFE_SHOOT_POSITION = 1000;
+	public final static int ENCODER_INTAKE_UP_POSITION = 3680;//3550
+	public final static int ENCODER_INTAKE_SWITCH_POSITION = 3225; //2800; then 2500;
+	public final static int ENCODER_INTAKE_SAFE_SHOOT_POSITION = 2000;
 
 	/*
 	 * PID
@@ -153,7 +153,7 @@ public final class Constants {
 	 */
 
 	// Driving
-	public final static double DRIVE_HEADING_P = 0.025;//0.018;
+	public final static double DRIVE_HEADING_P = 0.036;//0.018;
 	public final static double DRIVE_HEADING_I = 0.00;
 	public final static double DRIVE_HEADING_D = 0.085;
 	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
@@ -296,10 +296,10 @@ public final class Constants {
 			TALON_CATAPULT_RIGHT_INVERTED = false;
 
 			TALON_CLIMBER_RIGHT_ID = 14;
-			TALON_CLIMBER_RIGHT_INVERTED = true;
+			TALON_CLIMBER_RIGHT_INVERTED = false;
 
 			TALON_CLIMBER_LEFT_ID = 15;
-			TALON_CLIMBER_LEFT_INVERTED = false;
+			TALON_CLIMBER_LEFT_INVERTED = true;
 			
 			TALON_SCISSOR_ID = 16;
 			TALON_SCISSOR_INVERTED = false;
@@ -361,8 +361,9 @@ public final class Constants {
 	}
 
 	// SPEEDS
-	public final static double CLIMBER_SPEED = 0.5;
+	public final static double CLIMBER_SPEED = 1.0;
 	public final static double SCISSOR_UPPER_SPEED = 0.5;
 	public final static double SCISSOR_LOWER_SPEED = 0.1;
-	public final static double CATAPULT_LOWER_SPEED = 0.4;
+	public final static double SCISSOR_REVERSE_SPEED = -0.1;
+	public final static double CATAPULT_LOWER_SPEED = 0.5;
 }
