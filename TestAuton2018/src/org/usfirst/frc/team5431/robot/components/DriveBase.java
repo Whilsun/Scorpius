@@ -2,6 +2,7 @@ package org.usfirst.frc.team5431.robot.components;
 
 import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Titan;
+import org.usfirst.frc.team5431.robot.TitanNavx;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -29,7 +30,7 @@ public class DriveBase {
 
 	private final WPI_TalonSRX frontLeft, frontRight, middleLeft, middleRight, backLeft, backRight;
 	//private final Encoder leftEncoder, rightEncoder;
-	private final Titan.NavX navx = new Titan.NavX();
+	private final TitanNavx navx = new TitanNavx();
 
 	private TitanPIDSource pidSourceType = TitanPIDSource.NAVX;
 	private TitanPIDType pidType = TitanPIDType.NONE;
@@ -466,7 +467,7 @@ public class DriveBase {
 		distancePID.enable();
 	}
 	
-	public Titan.NavX getNavx() {
+	public TitanNavx getNavx() {
 		return navx;
 	}
 	

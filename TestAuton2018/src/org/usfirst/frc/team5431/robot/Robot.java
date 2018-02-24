@@ -18,8 +18,6 @@ import org.usfirst.frc.team5431.robot.auton.CalibrateCommand;
 import org.usfirst.frc.team5431.robot.auton.DriveCommand;
 import org.usfirst.frc.team5431.robot.auton.MimicCommad;
 import org.usfirst.frc.team5431.robot.auton.MimicCommad.Paths;
-import org.usfirst.frc.team5431.robot.auton.Step;
-import org.usfirst.frc.team5431.robot.auton.Step.StepResult;
 import org.usfirst.frc.team5431.robot.auton.TurnCommand;
 import org.usfirst.frc.team5431.robot.auton.WaitCommand;
 import org.usfirst.frc.team5431.robot.components.Catapult;
@@ -28,6 +26,8 @@ import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
 import org.usfirst.frc.team5431.robot.components.Intake;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
+import org.usfirst.frc.team5431.robot.robot.auton.Step;
+import org.usfirst.frc.team5431.robot.robot.auton.Step.StepResult;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
 import edu.wpi.first.wpilibj.DriverStation;

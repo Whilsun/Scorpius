@@ -5,13 +5,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.usfirst.frc.team5431.robot.Titan.Command.CommandResult;
-
-import com.kauailabs.navx.frc.AHRS;
+import org.usfirst.frc.team5431.robot.TitanDrive.DriveType;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -218,35 +215,61 @@ public final class Titan {
 		}
 	}
 
-	public static class NavX extends AHRS {
-		private double absoluteReset = 0;
-		private boolean yawDirection = false;
-
-		public NavX() {
-			super(SPI.Port.kMXP);
-
-			reset();
-			resetDisplacement();
+	public static class Drive {
+		public enum DriveType {
+			TANK
 		}
-
-		public void resetYaw() {
-			absoluteReset = getYaw();
-			if (absoluteReset <= 0) {
-				yawDirection = false; // false == left
-			} else {
-				yawDirection = true; // true == right
-			}
+		
+		public interface SensorSource {
+			double getAngle();
 		}
-
-		public double getAbsoluteYaw() {
-			if (!yawDirection) {
-				return getYaw() + absoluteReset;
-			} else {
-				return getYaw() - absoluteReset;
+		
+		private DriveType driveType = DriveType.TANK;
+		private SensorSource sSource= null;
+		
+		public Drive() {
+			driveType = DriveType.TANK;
+			sSource = new SensorSource() {
+				@Override
+				public double getAngle() {
+					return 0; //Don't have any angle correction
+				}
+			};
+		}
+		
+		public Drive(DriveType dType) {
+			driveType = dType;
+			sSource = new SensorSource() {
+				@Override
+				public double getAngle() {
+					return 0; //Don't have any angle correction
+				}
+			};
+		}
+		
+		public Drive(DriveType dType, SensorSource source) {
+			driveType = dType;
+			sSource = source;
+		}
+		
+		public void setDriveType(DriveType dType) {
+			driveType = dType;
+		}
+		
+		public void setSensorSource(SensorSource source) {
+			sSource = source;
+		}
+		
+		public void periodic() {
+			final double angle = sSource.getAngle();
+			switch(driveType) {
+			case TANK:
+				
+				break;
 			}
 		}
 	}
-
+	
 	public static class Pot extends AnalogInput {
 		private double minAngle = 0, maxAngle = 180;
 		private double minPotValue = 0, maxPotValue = 4096;
@@ -371,14 +394,14 @@ public final class Titan {
 			}
 
 			final Command<T> command = peek();
-			final CommandResult result = command.periodic(robot);
-			if (result == CommandResult.IN_PROGRESS) {
+			final Titan.Command.CommandResult result = command.periodic(robot);
+			if (result == Titan.Command.CommandResult.IN_PROGRESS) {
 				return true;
 			} else {
 				final double secondsElapsed = command.getSecondsElapsed();
 				Titan.l("Finished %s (Seconds: %.2f)", command.getName(), secondsElapsed);
 				command.done(robot);
-				if (result == CommandResult.COMPLETE) {
+				if (result == Titan.Command.CommandResult.COMPLETE) {
 					remove();
 					final Command<T> nextCommand = peek();
 					if (nextCommand != null) {
@@ -388,10 +411,10 @@ public final class Titan {
 					} else {
 						return false;
 					}
-				} else if (result == CommandResult.CLEAR_QUEUE) {
+				} else if (result == Titan.Command.CommandResult.CLEAR_QUEUE) {
 					clear();
 					Titan.l("Cleared queue");
-				} else if (result == CommandResult.RESTART_COMMAND) {
+				} else if (result == Titan.Command.CommandResult.RESTART_COMMAND) {
 					command.startTimer();
 					command.init(robot);
 				}
