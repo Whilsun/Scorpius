@@ -7,19 +7,9 @@
 
 package org.usfirst.frc.team5431.robot;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
-import org.usfirst.frc.team5431.robot.Titan.AssignableJoystick;
 import org.usfirst.frc.team5431.robot.Titan.CommandQueue;
-import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
-import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
 import org.usfirst.frc.team5431.robot.auton.BuildAutonomousCommand;
 import org.usfirst.frc.team5431.robot.auton.CalibrateCommand;
-import org.usfirst.frc.team5431.robot.auton.DriveCommand;
-import org.usfirst.frc.team5431.robot.auton.MimicCommad;
-import org.usfirst.frc.team5431.robot.auton.MimicCommad.Paths;
-import org.usfirst.frc.team5431.robot.auton.TurnCommand;
 import org.usfirst.frc.team5431.robot.auton.WaitCommand;
 import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
@@ -29,7 +19,7 @@ import org.usfirst.frc.team5431.robot.components.Intake;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -108,6 +98,9 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("I", Constants.TURN_I);
 		SmartDashboard.putNumber("D", Constants.TURN_D);
 		SmartDashboard.putData("Gyro", driveBase.getNavx());
+	
+		//Publish the camera to SD
+		CameraServer.getInstance().startAutomaticCapture();
 	}
 
 	@Override
@@ -150,20 +143,14 @@ public class Robot extends IterativeRobot {
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
 		intake.stayInPosition();
-		// intake.tryToZero(this);
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		// intake.goDown();
-		// intake.goUp();
-
-		// intake.pinch();
-		//teleop.periodicCatapult(this);
-		//teleop.periodicIntake(this);
-		//teleop.periodicDrive(this);
-		//teleop.periodicClimb(this);
-		SmartDashboard.putNumber("TESTENCODER", intake.getPincher().getSensorCollection().getQuadraturePosition());
+		teleop.periodicCatapult(this);
+		teleop.periodicIntake(this);
+		teleop.periodicDrive(this);
+		teleop.periodicClimb(this);
 	}
 
 	@Override
@@ -190,7 +177,6 @@ public class Robot extends IterativeRobot {
 		 * driveBase.disableAllPID(); updatePID(); driveBase.turnPID(angle);
 		 * updatePID(); case NONE: break; default: break; }
 		 */
-		// Logger.init("right_scale");
 	}
 
 	@Override

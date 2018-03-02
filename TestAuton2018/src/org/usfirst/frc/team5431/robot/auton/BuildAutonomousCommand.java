@@ -44,19 +44,14 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 						game.runSide(new SideChooser() {
 							@Override
 							public void left() {
-								aSteps.add(new DriveCommand(-46.5, -65.0));
-								aSteps.add(new DriveCommand(-51, 78));
-								aSteps.add(new WaitCommand(100));
+								aSteps.add(new DriveCommand(-48, -63.5));
+								aSteps.add(new DriveCommand(-48, 78, 3000));
 							}
 
 							@Override
 							public void right() {
-								//aSteps.add(new DriveStep(3.0));
-								//aSteps.add(new TurnStep(35.0)); 
-								aSteps.add(new DriveCommand(-60.0, 25.0));
-								aSteps.add(new DriveCommand(-32.0, -70.0));
-								//aSteps.add(new TurnStep(-35.0)); 
-								//aSteps.add(new DriveStep(10.0));
+								aSteps.add(new DriveCommand(-64.0, 21.0));
+								aSteps.add(new DriveCommand(-33, -72.0, 3000)); //Three second timeout
 							}
 						});
 						aSteps.add(new SwitchCubeCommand());

@@ -118,7 +118,7 @@ public final class Constants {
 	// Intake
 	public final static int ENCODER_AUTONOMOUS_START_POSITION = 3750;
 	public final static int ENCODER_INTAKE_UP_POSITION = 3680;//3550
-	public final static int ENCODER_INTAKE_SWITCH_POSITION = 3225; //2800; then 2500;
+	public final static int ENCODER_INTAKE_SWITCH_POSITION = 2700; //then 2500;
 	public final static int ENCODER_INTAKE_SAFE_SHOOT_POSITION = 2000;
 
 	/*
@@ -365,5 +365,5 @@ public final class Constants {
 	public final static double SCISSOR_UPPER_SPEED = 0.5;
 	public final static double SCISSOR_LOWER_SPEED = 0.1;
 	public final static double SCISSOR_REVERSE_SPEED = -0.1;
-	public final static double CATAPULT_LOWER_SPEED = 0.5;
+	public final static double CATAPULT_LOWER_SPEED = 0.75;
 }

@@ -9,18 +9,24 @@ import org.usfirst.frc.team5431.robot.vision.Vision;
 
 public class DriveCommand extends Titan.Command<Robot> {
 	private final double distance, angle, speed;
+	private long timeout = 1000000;
 
 	public DriveCommand(final double dis) {
 		this(dis, 0.0);
 	}
 
 	public DriveCommand(final double dis, final double ang) {
-		this(dis, ang, Constants.AUTO_ROBOT_DEFAULT_SPEED);
+		this(dis, ang, Constants.AUTO_ROBOT_DEFAULT_SPEED, 1000000);
+	}
+	
+	public DriveCommand(final double dis, final double ang, final long timet) {
+		this(dis, ang, Constants.AUTO_ROBOT_DEFAULT_SPEED, timet);
 	}
 
-	public DriveCommand(final double dis, final double ang, final double spd) {
+	public DriveCommand(final double dis, final double ang, final double spd, final long timet) {
 		distance = dis;
 		angle = ang;
+		timeout = timet;
 
 		if (distance < 0)
 			speed = -spd;
@@ -37,7 +43,7 @@ public class DriveCommand extends Titan.Command<Robot> {
 
 	@Override
 	public CommandResult periodic(final Robot robot) {
-		if (robot.getDriveBase().hasTravelled(distance)) {
+		if (robot.getDriveBase().hasTravelled(distance) || getElapsed() > timeout) {
 			return CommandResult.COMPLETE;
 		}
 		return CommandResult.IN_PROGRESS;

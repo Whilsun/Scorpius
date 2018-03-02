@@ -334,7 +334,7 @@ public class Intake {
 		if (isBelowSwitch()) {
 			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 1.25, 0.025);
 		} else {
-			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.35, 0.15);
+			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.45, 0.15);
 		}
 	}
 
@@ -550,7 +550,8 @@ public class Intake {
 				cubeShoot = System.currentTimeMillis();
 			}
 			
-			intakeReverseSlow();
+			///intakeReverseSlow(); //UNCOMMENT THIS WHEN THERE'S THE CLIMBER
+			intakeStop();
 			if((System.currentTimeMillis() - cubeShoot) < 400) {
 				releaseFast();
 			} else {

@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Catapult {
 	private final WPI_TalonSRX catapultLeft, catapultRight;
 	private final Solenoid shooterOne, shooterTwo;
+	private final Compressor compressor;
 	private final AnalogInput pressureSensor;
 	private boolean lowering = false;
 	private boolean shooting = false;
@@ -27,9 +29,16 @@ public class Catapult {
 	private int triesTaken = 0;
 
 	public Catapult() {
+		//Pull down motors
 		catapultLeft = new WPI_TalonSRX(Constants.TALON_CATAPULT_LEFT_ID);
 		catapultRight = new WPI_TalonSRX(Constants.TALON_CATAPULT_RIGHT_ID);
 
+		//Compressor
+		compressor = new Compressor();
+		compressor.clearAllPCMStickyFaults();
+		compressor.setClosedLoopControl(true);
+		compressor.start();
+		
 		// Inverted or not
 		catapultLeft.setInverted(Constants.TALON_CATAPULT_LEFT_INVERTED);
 		catapultRight.setInverted(Constants.TALON_CATAPULT_RIGHT_INVERTED);
@@ -98,9 +107,9 @@ public class Catapult {
 				robot.getIntake().shootSafe();
 			} else {
 				final long timeDisp = System.currentTimeMillis() - shootStart;
+				shooterOne.set(false);
+				shooterTwo.set(true);
 				if(timeDisp >= 100 && timeDisp < 350) {
-					shooterOne.set(false);
-					shooterTwo.set(true);
 					Titan.l("Shooting...");
 				} else if(timeDisp >= 350 && timeDisp < 480) {
 					catapultLeft.overrideLimitSwitchesEnable(true);
