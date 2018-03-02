@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.usfirst.frc.team5431.robot.TitanDrive.DriveType;
-
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -89,7 +87,7 @@ public final class Titan {
 		}
 
 		public boolean getRawButton(final Enum<?> value) {
-			return getRawButton(value.ordinal());
+			return getRawButton(value.ordinal() + 1);
 		}
 	}
 

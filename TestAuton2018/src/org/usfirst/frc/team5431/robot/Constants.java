@@ -110,7 +110,7 @@ public final class Constants {
 
 	// Pincher
 	public final static boolean ENCODER_PINCHER_INVERTED = true;
-	public final static int ENCODER_PINCHER_FORWARD_LIMIT = 600; // Encoder count limit
+	public final static int ENCODER_PINCHER_FORWARD_LIMIT = 500; // Encoder count limit
 	public final static boolean ENCODER_PINCHER_FORWARD_LIMIT_ENABLED = true;
 	public final static int ENCODER_PINCHER_REVERSE_LIMIT = 0; // Encoder count reverse limit
 	public final static boolean ENCODER_PINCHER_REVERSE_LIMIT_ENABLED = false;

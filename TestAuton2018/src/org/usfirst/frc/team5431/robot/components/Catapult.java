@@ -102,29 +102,30 @@ public class Catapult {
 					shooterOne.set(false);
 					shooterTwo.set(true);
 					Titan.l("Shooting...");
-				} else if(timeDisp >= 350 && timeDisp < 450) {
+				} else if(timeDisp >= 350 && timeDisp < 480) {
 					catapultLeft.overrideLimitSwitchesEnable(true);
 					catapultRight.overrideLimitSwitchesEnable(true);
 					catapultLeft.set(Constants.CATAPULT_LOWER_SPEED);
 					catapultRight.set(Constants.CATAPULT_LOWER_SPEED);
-				} else if(timeDisp >= 450 && timeDisp < 495) {
+				} else if(timeDisp >= 480 && timeDisp < 510) {
 					catapultLeft.set(-1.0);
 					catapultRight.set(-1.0);
-				} else if(timeDisp >= 480){
+				} else if(timeDisp >= 480) {
 					if(isLowered() && triesTaken < 5) {
 						shootStart = System.currentTimeMillis() - 348;
 						triesTaken++;
 					} else {
+						triesTaken = 10; //Manually override the limit
 						catapultLeft.overrideLimitSwitchesEnable(false);
 						catapultRight.overrideLimitSwitchesEnable(false);
 						shooterOne.set(false);
 						shooterTwo.set(false);
-						triesTaken = 0; //Reset the tries taken variable
 						Titan.l("Waiting...");
 						if(!isLowered()) {
 							lowerCatapult();
 						} else {
 							shooting = false;
+							triesTaken = 0; //Reset the tries taken variable
 							//robot.getIntake().stayUp();
 						}
 					}

@@ -90,7 +90,7 @@ public class Intake {
 		intakePincher.setSensorPhase(true);
 		intakePincher.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
 				LimitSwitchNormal.NormallyOpen, 0);
-		intakePincher.configReverseSoftLimitThreshold(-800, 0);
+		intakePincher.configReverseSoftLimitThreshold(-700, 0);
 		intakePincher.configReverseSoftLimitEnable(true, 0);
 
 		// Setup the intake's current limiting
@@ -437,7 +437,7 @@ public class Intake {
 			SmartDashboard.putBoolean("SeekingCube", true);
 			if (hasCube()) { // There's a cube in the proximity
 				final long timeDiff = System.currentTimeMillis() - cubeStart;
-				if (timeDiff < 500 || isCapturePressed) { // Pinch hard and fast for 500 milliseconds
+				if (timeDiff < 200 || isCapturePressed) { // Pinch hard and fast for 500 milliseconds
 					intakeFast(); // Quickly suck the cube to the back of the intake
 					if(Titan.approxEquals(timeDiff % 800, 0, 10)) {
 						captureDirection = !captureDirection;
@@ -448,10 +448,10 @@ public class Intake {
 					} else {
 						pinchHard();
 					}
-				} else if(timeDiff > 500 && timeDiff < 1000 &&!isCapturePressed) {
+				} else if(timeDiff > 200 && timeDiff < 400 &&!isCapturePressed) {
 					intakeSlow(); // Intake the cube so that it sits flush with the back of the intake
 					pinchSoft(); // Pinch to hold the cube while it's going up
-				} else if(timeDiff > 500 && (captureDirection) && !isCapturePressed) {
+				} else if(timeDiff > 400 && (captureDirection) && !isCapturePressed) {
 					intakeSlow();
 					pinchHard();
 				} else {
@@ -507,7 +507,11 @@ public class Intake {
 				
 				if(hasCube()) {	
 					intakeSlow();
-					pinchSoft();
+					if(isBelowSwitch()) { //Pinch it hard the first little bit
+						pinchHard();
+					} else { //Then pinch softly at the top
+						pinchSoft();
+					}
 				} else {
 					goUp();
 					intakeStop(); // Stop rotating

@@ -53,7 +53,7 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 							public void right() {
 								//aSteps.add(new DriveStep(3.0));
 								//aSteps.add(new TurnStep(35.0)); 
-								aSteps.add(new DriveCommand(-60.0, 30.0));
+								aSteps.add(new DriveCommand(-60.0, 25.0));
 								aSteps.add(new DriveCommand(-32.0, -70.0));
 								//aSteps.add(new TurnStep(-35.0)); 
 								//aSteps.add(new DriveStep(10.0));

@@ -51,7 +51,7 @@ public class MimicCommad extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public StepCommand periodic(final Robot robot) {
+	public CommandResult periodic(final Robot robot) {
 		boolean nextStep = true;
 		try {
 			final Stepper step = steps.get(currentStep);

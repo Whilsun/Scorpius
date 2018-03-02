@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.usfirst.frc.team5431.robot.Titan.AssignableJoystick;
+import org.usfirst.frc.team5431.robot.Titan.CommandQueue;
 import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
 import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
 import org.usfirst.frc.team5431.robot.auton.BuildAutonomousCommand;
@@ -26,8 +27,6 @@ import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
 import org.usfirst.frc.team5431.robot.components.Intake;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
-import org.usfirst.frc.team5431.robot.robot.auton.Step;
-import org.usfirst.frc.team5431.robot.robot.auton.Step.StepResult;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -55,6 +54,7 @@ public class Robot extends IterativeRobot {
 		HEADING, TURNING, NONE
 	}
 
+	//Auto steps
 	private final Titan.CommandQueue<Robot> aSteps = new Titan.CommandQueue<>();
 	
 	private final Titan.GameData game = new Titan.GameData();
@@ -136,8 +136,6 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousPeriodic() {
-		AssignableJoystick<Robot> rodgjka;
-		rodgjka.getRawAxis(Titan.Xbox.Axis.LEFT_X);
 		if (!aSteps.periodic(this)){
 			driveBase.drive(0.0, 0.0);
 		}
@@ -162,9 +160,10 @@ public class Robot extends IterativeRobot {
 
 		// intake.pinch();
 		//teleop.periodicCatapult(this);
-		teleop.periodicIntake(this);
-		teleop.periodicDrive(this);
-		teleop.periodicClimb(this);
+		//teleop.periodicIntake(this);
+		//teleop.periodicDrive(this);
+		//teleop.periodicClimb(this);
+		SmartDashboard.putNumber("TESTENCODER", intake.getPincher().getSensorCollection().getQuadraturePosition());
 	}
 
 	@Override
@@ -246,7 +245,7 @@ public class Robot extends IterativeRobot {
 		return game;
 	}
 
-	public Queue<Step> getAutonSteps() {
+	public CommandQueue<Robot> getAutonSteps() {
 		return aSteps;
 	}
 }
