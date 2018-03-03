@@ -116,9 +116,9 @@ public final class Constants {
 	public final static boolean ENCODER_PINCHER_REVERSE_LIMIT_ENABLED = false;
 
 	// Intake
-	public final static int ENCODER_AUTONOMOUS_START_POSITION = 3750;
-	public final static int ENCODER_INTAKE_UP_POSITION = 3680;//3550
-	public final static int ENCODER_INTAKE_SWITCH_POSITION = 2700; //then 2500;
+	public final static int ENCODER_AUTONOMOUS_START_POSITION = 4100;
+	public final static int ENCODER_INTAKE_UP_POSITION = 3850;//3550
+	public final static int ENCODER_INTAKE_SWITCH_POSITION = 3300; //then 2500;
 	public final static int ENCODER_INTAKE_SAFE_SHOOT_POSITION = 2000;
 
 	/*

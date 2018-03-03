@@ -230,7 +230,7 @@ public class Intake {
 	}
 
 	public void intakeHold() {
-		intake.set(0.13);
+		intake.set(0.08);
 	}
 
 	public void intakeReverse() {
@@ -253,6 +253,10 @@ public class Intake {
 		pinch(-0.4);
 	}
 
+	public void pinchStayUp() {
+		pinch(-0.08);
+	}
+	
 	public void pinchHold() {
 		pinch(-0.14);
 	}
@@ -307,9 +311,9 @@ public class Intake {
 	public void goUp() {
 		if(!isUp()) {
 			if(isBelowSwitch()) {
-				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.25, 0.1);
+				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.05, 0.18);
 			} else {
-				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.5, 0.025); //0.45, 0.05);
+				goTo(Constants.ENCODER_INTAKE_UP_POSITION, 1.5, 0.0225); //0.45, 0.05);
 			}
 		} else {
 			stopUp();
@@ -318,7 +322,7 @@ public class Intake {
 	
 	public void goShootSafe() {
 		if(!isBelowShootSafe()) {
-			goTo(Constants.ENCODER_INTAKE_SAFE_SHOOT_POSITION, 1.25, 0.125);
+			goTo(Constants.ENCODER_INTAKE_SAFE_SHOOT_POSITION, 1.1, 0.125);
 		}
 	}
 
@@ -332,9 +336,9 @@ public class Intake {
 
 	public void goSwitch() {
 		if (isBelowSwitch()) {
-			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 1.25, 0.025);
+			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 1.1, 0.025);
 		} else {
-			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.45, 0.15);
+			goTo(Constants.ENCODER_INTAKE_SWITCH_POSITION, 0.315, 0.3);
 		}
 	}
 
@@ -478,7 +482,7 @@ public class Intake {
 				moveStart = 0; // Reset the lower start if the catapult isn't already lowered
 			if(isUp()) { //If it's in the catapult then hold onto the cube
 				goUp();
-				pinchHold();
+				pinchStayUp();
 				if(hasCube()) {
 					intakeHold();
 				} else {
@@ -505,7 +509,7 @@ public class Intake {
 					}
 				}
 				
-				if(hasCube()) {	
+				if(hasCube()) {
 					intakeSlow();
 					if(isBelowSwitch()) { //Pinch it hard the first little bit
 						pinchHard();
