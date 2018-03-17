@@ -21,7 +21,6 @@ import org.usfirst.frc.team5431.robot.auton.MimicCommad;
 import org.usfirst.frc.team5431.robot.auton.MimicCommad.Paths;
 import org.usfirst.frc.team5431.robot.auton.TurnCommand;
 import org.usfirst.frc.team5431.robot.auton.WaitCommand;
-import org.usfirst.frc.team5431.robot.components.Catapult;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
@@ -38,7 +37,6 @@ public class Robot extends IterativeRobot {
 
 	private final DriveBase driveBase = new DriveBase();
 	private final Climber climber = new Climber();
-	private final Catapult catapult = new Catapult();
 	private final Teleop teleop = new Teleop();
 	private final Intake intake = new Intake();
 
@@ -113,8 +111,6 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		driveBase.setBrakeMode(true);
-		intake.recalibrate(); //Try to calibrate in the up position
-		intake.stayUp();
 
 		final AutonPriority priority = autonChooser.getSelected();
 		final AutonPosition position = positionChooser.getSelected();
@@ -142,28 +138,20 @@ public class Robot extends IterativeRobot {
 		
 		//Update the intake and climber
 		intake.update(this);
-		catapult.update(this);
 	}
 
 	@Override
 	public void teleopInit() {
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
-		intake.stayInPosition();
 		// intake.tryToZero(this);
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		// intake.goDown();
-		// intake.goUp();
-
-		// intake.pinch();
-		//teleop.periodicCatapult(this);
-		//teleop.periodicIntake(this);
-		//teleop.periodicDrive(this);
+		teleop.periodicIntake(this);
+		teleop.periodicDrive(this);
 		//teleop.periodicClimb(this);
-		SmartDashboard.putNumber("TESTENCODER", intake.getPincher().getSensorCollection().getQuadraturePosition());
 	}
 
 	@Override
@@ -206,7 +194,6 @@ public class Robot extends IterativeRobot {
 		}
 		
 		intake.update(this);
-		catapult.update(this);
 	}
 
 	public void disabledInit() {
@@ -231,10 +218,6 @@ public class Robot extends IterativeRobot {
 
 	public Climber getClimber() {
 		return climber;
-	}
-
-	public Catapult getCatapult() {
-		return catapult;
 	}
 
 	public Intake getIntake() {

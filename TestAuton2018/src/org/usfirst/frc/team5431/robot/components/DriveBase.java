@@ -233,14 +233,14 @@ public class DriveBase {
 		 * ENCODER DEFINITIONS
 		 */
 		//Left side
-		middleLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		middleLeft.setSensorPhase(false);
-		middleLeft.setSelectedSensorPosition(0, 0, 0);
+		backLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+		backLeft.setSensorPhase(false);
+		backLeft.setSelectedSensorPosition(0, 0, 0);
 		
 		//Right side
-		frontRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		frontRight.setSensorPhase(false);
-		frontRight.setSelectedSensorPosition(0, 0, 0);
+		backRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+		backRight.setSensorPhase(false);
+		backRight.setSelectedSensorPosition(0, 0, 0);
 		
 		/*//Left side
 		leftEncoder = new Encoder(Constants.ENCODER_LEFT_DRIVE_CHANNEL_1, Constants.ENCODER_LEFT_DRIVE_CHANNEL_2, false, EncodingType.k4X);
@@ -472,12 +472,12 @@ public class DriveBase {
 	}
 	
 	public final double getLeftDistance() {
-		return middleLeft.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
+		return backLeft.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
 
 	}
 	
 	public final double getRightDistance() {
-		return frontRight.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
+		return backRight.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
 
 	}	
 	
@@ -509,8 +509,8 @@ public class DriveBase {
 	}
 
 	public final void resetEncoders() {
-		middleLeft.setSelectedSensorPosition(0, 0, 0);
-		frontRight.setSelectedSensorPosition(0, 0, 0);
+		backLeft.setSelectedSensorPosition(0, 0, 0);
+		backRight.setSelectedSensorPosition(0, 0, 0);
 		//leftEncoder.reset();
 		//rightEncoder.reset();
 	}

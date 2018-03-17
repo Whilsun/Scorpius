@@ -61,20 +61,11 @@ public final class Constants {
 	public final static int TALON_INTAKE_RIGHT_ID;
 	public final static boolean TALON_INTAKE_RIGHT_INVERTED;
 
-	public final static int TALON_INTAKE_PINCHER_ID;
-	public final static boolean TALON_INTAKE_PINCHER_INVERTED;
-
 	public final static int TALON_INTAKE_UP_LEFT_ID;
 	public final static boolean TALON_INTAKE_UP_LEFT_INVERTED;
 
 	public final static int TALON_INTAKE_UP_RIGHT_ID;
 	public final static boolean TALON_INTAKE_UP_RIGHT_INVERTED;
-
-	public final static int TALON_CATAPULT_LEFT_ID;
-	public final static boolean TALON_CATAPULT_LEFT_INVERTED;
-
-	public final static int TALON_CATAPULT_RIGHT_ID;
-	public final static boolean TALON_CATAPULT_RIGHT_INVERTED;
 
 	public final static int TALON_CLIMBER_RIGHT_ID;
 	public final static boolean TALON_CLIMBER_RIGHT_INVERTED;
@@ -108,12 +99,6 @@ public final class Constants {
 	public final static double ENCODER_DISTANCE_PER_PULSE = (ROBOT_WHEEL_DIAMETER * Math.PI)
 			/ ENCODER_STEPS_PER_FULL_ROTATION;
 
-	// Pincher
-	public final static boolean ENCODER_PINCHER_INVERTED = true;
-	public final static int ENCODER_PINCHER_FORWARD_LIMIT = 500; // Encoder count limit
-	public final static boolean ENCODER_PINCHER_FORWARD_LIMIT_ENABLED = true;
-	public final static int ENCODER_PINCHER_REVERSE_LIMIT = 0; // Encoder count reverse limit
-	public final static boolean ENCODER_PINCHER_REVERSE_LIMIT_ENABLED = false;
 
 	// Intake
 	public final static int ENCODER_AUTONOMOUS_START_POSITION = 3750;
@@ -184,27 +169,6 @@ public final class Constants {
 	public final static double VISION_MIN_MAX = 0.5;
 
 	public final static double PIVOT_DISTANCE_SCALING = 0.11;
-
-	/*
-	 * CURRENT LIMITING
-	 */
-	// Intake pincher
-	public final static int INTAKE_PINCHER_CONTINUOUS_LIMIT = 15;
-	public final static int INTAKE_PINCHER_PEAK_LIMIT = 20;
-	public final static int INTAKE_PINCHER_PEAK_DURATION = 500;
-	public final static boolean INTAKE_PINCHER_ENABLE_CURRENT_LIMITING = true;
-
-	// Intake up
-	public final static int INTAKE_UP_CONTINUOUS_LIMIT = 10;
-	public final static int INTAKE_UP_PEAK_LIMIT = 18;
-	public final static int INTAKE_UP_PEAK_DURATION = 800;
-	public final static boolean INTAKE_UP_ENABLE_CURRENT_LIMITING = true;
-
-	/*
-	 * RAMP RATES
-	 */
-	// Intake
-	public final static int INTAKE_PINCHER_RAMP_RATE = 0;
 
 	public static class Vision {
 		public final static int IMAGE_WIDTH = 320;
@@ -278,22 +242,13 @@ public final class Constants {
 			TALON_INTAKE_LEFT_INVERTED = false;
 
 			TALON_INTAKE_RIGHT_ID = 8;
-			TALON_INTAKE_RIGHT_INVERTED = true;
-
-			TALON_INTAKE_PINCHER_ID = 9;
-			TALON_INTAKE_PINCHER_INVERTED = false;
+			TALON_INTAKE_RIGHT_INVERTED = false;
 
 			TALON_INTAKE_UP_LEFT_ID = 10;
 			TALON_INTAKE_UP_LEFT_INVERTED = true;
 
 			TALON_INTAKE_UP_RIGHT_ID = 11;
 			TALON_INTAKE_UP_RIGHT_INVERTED = false;
-
-			TALON_CATAPULT_LEFT_ID = 12;
-			TALON_CATAPULT_LEFT_INVERTED = true;
-
-			TALON_CATAPULT_RIGHT_ID = 13;
-			TALON_CATAPULT_RIGHT_INVERTED = false;
 
 			TALON_CLIMBER_RIGHT_ID = 14;
 			TALON_CLIMBER_RIGHT_INVERTED = false;
@@ -330,20 +285,11 @@ public final class Constants {
 			TALON_INTAKE_RIGHT_ID = TALON_UNUSED;
 			TALON_INTAKE_RIGHT_INVERTED = false;
 
-			TALON_INTAKE_PINCHER_ID = TALON_UNUSED;
-			TALON_INTAKE_PINCHER_INVERTED = false;
-
 			TALON_INTAKE_UP_LEFT_ID = TALON_UNUSED;
 			TALON_INTAKE_UP_LEFT_INVERTED = false;
 
 			TALON_INTAKE_UP_RIGHT_ID = TALON_UNUSED;
 			TALON_INTAKE_UP_RIGHT_INVERTED = false;
-
-			TALON_CATAPULT_LEFT_ID = TALON_UNUSED;
-			TALON_CATAPULT_LEFT_INVERTED = false;
-
-			TALON_CATAPULT_RIGHT_ID = TALON_UNUSED;
-			TALON_CATAPULT_RIGHT_INVERTED = false;
 
 			TALON_CLIMBER_RIGHT_ID = 6;
 			TALON_CLIMBER_RIGHT_INVERTED = true;

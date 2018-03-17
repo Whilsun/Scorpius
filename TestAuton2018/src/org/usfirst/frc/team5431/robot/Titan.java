@@ -161,6 +161,21 @@ public final class Titan {
 			super(port);
 		}
 	}
+	
+	public static class LogitechExtreme3D extends Titan.Joystick {
+		public static enum Button {
+			// ordered correctly, so ordinal reflects real mapping
+			TRIGGER, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, TEN, ELEVEN, TWELVE
+		}
+
+		public static enum Axis {
+			X, Y, Z, SLIDER
+		}
+
+		public LogitechExtreme3D(int port) {
+			super(port);
+		}
+	}
 
 	public static class AssignableJoystick<T> extends Titan.Joystick {
 		private final Map<Integer, Supplier<CommandQueue<T>>> assignments = new HashMap<>();
@@ -321,7 +336,7 @@ public final class Titan {
 		}
 
 		public double getAbsoluteAngle() {
-			return linearMap(getValue(), minPotValue, maxPotValue, minAngle, maxAngle);
+			return -linearMap(getAverageVoltage(), minPotValue, maxPotValue, minAngle, maxAngle);
 		}
 
 		private static double linearMap(final double currentValue, final double minInputValue,

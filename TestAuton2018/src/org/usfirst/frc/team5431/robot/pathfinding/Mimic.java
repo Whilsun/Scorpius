@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
-import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
 
 public class Mimic {
 	public static final String mimicFile = "/media/sda1/%s.mimic";
@@ -111,15 +110,15 @@ public class Mimic {
 				}
 				
 				if(switchShoot && !switched) {
-					robot.getIntake().shootCube();
+//					robot.getIntake().shootCube();
 					switchShoot = true;
 				} else switchShoot = false;
 				
 				//@TODO FIX THE CRAP
-				if(robot.getIntake().getState() == IntakeState.STAY_UP || switchShoot) {
-					if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower, home, switchShoot).toString().getBytes(StandardCharsets.US_ASCII));	
-				}
-				
+//				if(robot.getIntake().getState() == IntakeState.STAY_UP || switchShoot) {
+//					if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower, home, switchShoot).toString().getBytes(StandardCharsets.US_ASCII));	
+//				}
+//				
 				homed = home;
 				switched = switchShoot;
 			} catch (Exception e) {

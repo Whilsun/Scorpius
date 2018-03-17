@@ -16,7 +16,6 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 		}
 		
 		if(robot.getGameData().hasData()) return CommandResult.COMPLETE;
-		robot.getIntake().pinchSoft();
 		robot.getDriveBase().drive(0.0, 0.0);
 		Titan.l("Calibrating... %d (Current game data: %s)", getElapsed(), robot.getGameData().getString());
 		return CommandResult.IN_PROGRESS;
@@ -24,14 +23,12 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 
 	@Override
 	public void init(final Robot robot) {
-		robot.getIntake().intakeStop();
 		robot.getIntake().stopUp();
 	}
 
 	@Override
 	public void done(final Robot robot) {
 		robot.getDriveBase().setHome();
-		robot.getIntake().intakeStop();
 		robot.getIntake().stopUp();
 	}
 }

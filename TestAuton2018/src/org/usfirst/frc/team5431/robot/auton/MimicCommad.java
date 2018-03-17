@@ -6,7 +6,6 @@ import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
-import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
@@ -59,11 +58,11 @@ public class MimicCommad extends Titan.Command<Robot> {
 			if(step.isHome) {
 				robot.getDriveBase().reset(); //Do not call setHome because that disables PID
 			} else if(step.isSwitch) {
-				robot.getIntake().shootCube();
-				if(robot.getIntake().getState() != IntakeState.STAY_UP) {
-					skippedSteps = 0;
-					nextStep = false;
-				}
+//				robot.getIntake().shootCube();
+//				if(robot.getIntake().getState() != IntakeState.STAY_UP) {
+//					skippedSteps = 0;
+//					nextStep = false;
+//				}
 			} else {
 				final double power = (step.leftPower + step.rightPower) / 2.0;
 				

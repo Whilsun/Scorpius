@@ -1,18 +1,18 @@
 package org.usfirst.frc.team5431.robot;
 
-import org.usfirst.frc.team5431.robot.Titan.Xbox.Axis;
 import org.usfirst.frc.team5431.robot.Titan.Xbox.Button;
+import org.usfirst.frc.team5431.robot.components.Intake;
 
 public final class Teleop {
 	private final Titan.Xbox driver;
-	private Titan.Xbox operator;
+	private final Titan.LogitechExtreme3D operator;
 	private final Titan.Toggle cubeCaptureToggle = new Titan.Toggle();
 
 	public Teleop() {
 		driver = new Titan.Xbox(0);
 		driver.setDeadzone(0.1);
 
-		operator = new Titan.Xbox(1);
+		operator = new Titan.LogitechExtreme3D(1);
 		operator.setDeadzone(0.1);
 	}
 
@@ -39,7 +39,7 @@ public final class Teleop {
 			robot.getClimber().scissorUpFast();
 		} else if (driver.getRawButton(Button.X)) {
 			robot.getClimber().scissorUpSlow();
-		} else if(driver.getRawButton(Button.A)) {
+		} else if (driver.getRawButton(Button.A)) {
 			robot.getClimber().scissorDown();
 		} else {
 			robot.getClimber().stopScissor();
@@ -47,56 +47,25 @@ public final class Teleop {
 	}
 
 	public final void periodicIntake(final Robot robot) {
-		if (operator.getRawAxis(Axis.TRIGGER_RIGHT) > 0.5) {
-			robot.getIntake().captureCube();
+		final Intake intake = robot.getIntake();
+
+		intake.setUpSpeed(operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y));
+
+		if (cubeCaptureToggle.isToggled(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWO))) {
+			if(intake.hasCube()){
+				cubeCaptureToggle.setState(false);
+			}else {
+				intake.setIntakeSpeed(0.7);	
+			}
+		} else if (operator.getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
+			intake.setIntakeSpeed(-0.7);
+		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.THREE)){
+			intake.setIntakeSpeed(0.7);
+		}else {
+			intake.stopIntake();
 		}
 
-		if (operator.getRawAxis(Axis.TRIGGER_LEFT) > 0.5) {
-			robot.getIntake().shootCube();
-		}
-
-		if (operator.getRawButton(Button.BUMPER_L)) {
-			robot.getIntake().downRelease();
-		}
-		
-		if(operator.getRawButton(Button.A)) {
-			robot.getIntake().stayUp();
-		}
-		
-		if(operator.getRawButton(Button.B)) {
-			robot.getIntake().stayDown();
-		}
-		
-		//if(operator.getRawButton(button))
-
-		/*
-		 * if(operator.getRawAxis(Axis.TRIGGER_RIGHT) > 0.5) {
-		 * robot.getCatapult().shoot(); } else if(operator.getRawButton(Button.Y)) {
-		 * robot.getCatapult().setLowering(true); } else {
-		 * 
-		 * robot.getCatapult().setLowering(false); robot.getCatapult().releaseShooter();
-		 * }
-		 */
-
-		/*
-		 * if(operator.getRawButton(Button.X)) { robot.getIntake().goDown(); }else
-		 * if(operator.getRawButton(Button.START)) { robot.getIntake().goUp(); }else {
-		 * robot.getIntake().stopUp(); }
-		 */
-
-		robot.getIntake().update(robot);
-	}
-
-	public final void periodicCatapult(final Robot robot) {
-		if (operator.getRawButton(Button.X)) {
-			robot.getCatapult().lowerCatapult();
-		}
-
-		if (operator.getRawButton(Button.BUMPER_R)) {
-			robot.getCatapult().shoot();
-		}
-
-		robot.getCatapult().update(robot);
+		intake.update(robot);
 	}
 
 	public Titan.Xbox getXbox() {
