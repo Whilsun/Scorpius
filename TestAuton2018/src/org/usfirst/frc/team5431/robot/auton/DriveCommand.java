@@ -36,7 +36,7 @@ public class DriveCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		if (robot.getDriveBase().hasTravelled(distance)) {
 			return CommandResult.COMPLETE;
 		}

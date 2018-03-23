@@ -1,7 +1,7 @@
 package org.usfirst.frc.team5431.robot;
 
 import org.usfirst.frc.team5431.robot.Titan.Xbox.Button;
-import org.usfirst.frc.team5431.robot.components.Intake;
+import org.usfirst.frc.team5431.robot.components.Elevator;
 
 public final class Teleop {
 	private final Titan.Xbox driver;
@@ -47,7 +47,7 @@ public final class Teleop {
 	}
 
 	public final void periodicIntake(final Robot robot) {
-		final Intake intake = robot.getIntake();
+		final Elevator intake = robot.getIntake();
 
 		intake.setUpSpeed(operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y));
 
@@ -55,12 +55,12 @@ public final class Teleop {
 			if(intake.hasCube()){
 				cubeCaptureToggle.setState(false);
 			}else {
-				intake.setIntakeSpeed(0.7);	
+				intake.setIntakeSpeed(1.0);	
 			}
 		} else if (operator.getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
-			intake.setIntakeSpeed(-0.7);
+			intake.setIntakeSpeed(-1.0);
 		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.THREE)){
-			intake.setIntakeSpeed(0.7);
+			intake.setIntakeSpeed(1.0);
 		}else {
 			intake.stopIntake();
 		}

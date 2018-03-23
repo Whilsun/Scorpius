@@ -50,7 +50,7 @@ public class TurnCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		final double turnDeg = (double) degreeChunks.get(currentChunk);
 		if(robot.getDriveBase().hasTurned(turnDeg)) {
 			currentChunk++;

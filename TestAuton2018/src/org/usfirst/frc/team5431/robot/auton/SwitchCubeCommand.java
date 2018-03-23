@@ -15,13 +15,13 @@ public class SwitchCubeCommand extends Titan.Command<Robot>{
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 //		//Check to see if the state machine is done
 //		robot.getDriveBase().drive(-0.15, -0.15);
 //		if(robot.getIntake().getState() == IntakeState.STAY_UP) {
 //			return CommandResult.COMPLETE;
 //		}
-		return CommandResult.IN_PROGRESS;
+		return CommandResult.COMPLETE;
 	}
 
 	@Override

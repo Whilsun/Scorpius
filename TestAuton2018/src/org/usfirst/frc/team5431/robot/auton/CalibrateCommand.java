@@ -10,7 +10,7 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		if(getElapsed() > 200) {
 			return CommandResult.COMPLETE; //Timeout
 		}

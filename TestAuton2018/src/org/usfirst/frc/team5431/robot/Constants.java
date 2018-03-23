@@ -1,10 +1,6 @@
 package org.usfirst.frc.team5431.robot;
 
 public final class Constants {
-	private static enum RobotMappings {
-		CATABOT, THRICE
-	}
-
 	private static enum CameraSettings {
 		LIFECAM
 	}
@@ -12,7 +8,6 @@ public final class Constants {
 	/*
 	 * MAIN CONFIGURATIONS
 	 */
-	private static final RobotMappings ROBOT_MAPPINGS = RobotMappings.CATABOT;
 	private static final CameraSettings CAMERA_SETTINGS = CameraSettings.LIFECAM;
 
 	/*
@@ -61,20 +56,17 @@ public final class Constants {
 	public final static int TALON_INTAKE_RIGHT_ID;
 	public final static boolean TALON_INTAKE_RIGHT_INVERTED;
 
-	public final static int TALON_INTAKE_UP_LEFT_ID;
-	public final static boolean TALON_INTAKE_UP_LEFT_INVERTED;
+	public final static int TALON_INTAKE_UP_FRONT_LEFT_ID;
+	public final static boolean TALON_INTAKE_UP_FRONT_LEFT_INVERTED;
 
-	public final static int TALON_INTAKE_UP_RIGHT_ID;
-	public final static boolean TALON_INTAKE_UP_RIGHT_INVERTED;
+	public final static int TALON_INTAKE_UP_FRONT_RIGHT_ID;
+	public final static boolean TALON_INTAKE_UP_FRONT_RIGHT_INVERTED;
 
-	public final static int TALON_CLIMBER_RIGHT_ID;
-	public final static boolean TALON_CLIMBER_RIGHT_INVERTED;
+	public final static int TALON_INTAKE_UP_BACK_RIGHT_ID;
+	public final static boolean TALON_INTAKE_UP_BACK_RIGHT_INVERTED;
 
-	public final static int TALON_CLIMBER_LEFT_ID;
-	public final static boolean TALON_CLIMBER_LEFT_INVERTED;
-	
-	public final static int TALON_SCISSOR_ID;
-	public final static boolean TALON_SCISSOR_INVERTED;
+	public final static int TALON_INTAKE_UP_BACK_LEFT_ID;
+	public final static boolean TALON_INTAKE_UP_BACK_LEFT_INVERTED;
 
 	/*
 	 * ENCODERS
@@ -216,10 +208,6 @@ public final class Constants {
 	}
 
 	static {
-		// Catabot
-		switch (ROBOT_MAPPINGS) {
-		case CATABOT:
-		default:
 			TALON_FRONT_LEFT_ID = 1;
 			TALON_FRONT_LEFT_INVERTED = true;
 
@@ -244,66 +232,17 @@ public final class Constants {
 			TALON_INTAKE_RIGHT_ID = 8;
 			TALON_INTAKE_RIGHT_INVERTED = false;
 
-			TALON_INTAKE_UP_LEFT_ID = 10;
-			TALON_INTAKE_UP_LEFT_INVERTED = true;
+			TALON_INTAKE_UP_FRONT_LEFT_ID = 10;
+			TALON_INTAKE_UP_FRONT_LEFT_INVERTED = true;
 
-			TALON_INTAKE_UP_RIGHT_ID = 11;
-			TALON_INTAKE_UP_RIGHT_INVERTED = false;
+			TALON_INTAKE_UP_FRONT_RIGHT_ID = 11;
+			TALON_INTAKE_UP_FRONT_RIGHT_INVERTED = false;
 
-			TALON_CLIMBER_RIGHT_ID = 14;
-			TALON_CLIMBER_RIGHT_INVERTED = false;
+			TALON_INTAKE_UP_BACK_RIGHT_ID = 14;
+			TALON_INTAKE_UP_BACK_RIGHT_INVERTED = false;
 
-			TALON_CLIMBER_LEFT_ID = 15;
-			TALON_CLIMBER_LEFT_INVERTED = true;
-			
-			TALON_SCISSOR_ID = 16;
-			TALON_SCISSOR_INVERTED = false;
-			break;
-
-		case THRICE:
-			TALON_FRONT_LEFT_ID = 5;
-			TALON_FRONT_LEFT_INVERTED = false;
-
-			TALON_MIDDLE_LEFT_ID = 4;
-			TALON_MIDDLE_LEFT_INVERTED = false;
-
-			TALON_BACK_LEFT_ID = 4;
-			TALON_BACK_LEFT_INVERTED = false;
-
-			TALON_FRONT_RIGHT_ID = 2;
-			TALON_FRONT_RIGHT_INVERTED = true;
-
-			TALON_MIDDLE_RIGHT_ID = 3;
-			TALON_MIDDLE_RIGHT_INVERTED = true;
-
-			TALON_BACK_RIGHT_ID = 3;
-			TALON_BACK_RIGHT_INVERTED = true;
-
-			TALON_INTAKE_LEFT_ID = TALON_UNUSED;
-			TALON_INTAKE_LEFT_INVERTED = false;
-
-			TALON_INTAKE_RIGHT_ID = TALON_UNUSED;
-			TALON_INTAKE_RIGHT_INVERTED = false;
-
-			TALON_INTAKE_UP_LEFT_ID = TALON_UNUSED;
-			TALON_INTAKE_UP_LEFT_INVERTED = false;
-
-			TALON_INTAKE_UP_RIGHT_ID = TALON_UNUSED;
-			TALON_INTAKE_UP_RIGHT_INVERTED = false;
-
-			TALON_CLIMBER_RIGHT_ID = 6;
-			TALON_CLIMBER_RIGHT_INVERTED = true;
-
-			TALON_CLIMBER_LEFT_ID = 8;
-			TALON_CLIMBER_LEFT_INVERTED = false;
-			
-			TALON_SCISSOR_ID = TALON_UNUSED;
-			TALON_SCISSOR_INVERTED = false;
-
-			// ENCODER_LEFT_DRIVE_INVERTED = true;
-			// ENCODER_RIGHT_DRIVE_INVERTED = false;
-			break;
-		}
+			TALON_INTAKE_UP_BACK_LEFT_ID = 15;
+			TALON_INTAKE_UP_BACK_LEFT_INVERTED = true;
 	}
 
 	// SPEEDS

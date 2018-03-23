@@ -10,37 +10,43 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
-public class Intake {
-	private final WPI_TalonSRX intakeLeft, intakeRight, intakeUpLeft, intakeUpRight;
+public class Elevator {
+	private final WPI_TalonSRX intakeLeft, intakeRight, intakeUpFrontLeft, intakeUpBackLeft, intakeUpFrontRight, intakeUpBackRight;
 	private final DigitalInput intakeStop, cubeDetector;
 
 	private final SpeedControllerGroup intake, intakeUp;
-	private final Titan.Pot potent;
-
-	public Intake() {
+	private final Titan.Lidar lidar;
+	
+	private double wantedDistance = -1.0;
+	
+	public Elevator() {
 		intakeLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_LEFT_ID);
 		intakeRight = new WPI_TalonSRX(Constants.TALON_INTAKE_RIGHT_ID);
-		intakeUpLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_LEFT_ID);
-		intakeUpRight = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_RIGHT_ID);
+		intakeUpFrontLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_FRONT_LEFT_ID);
+		intakeUpFrontRight = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_FRONT_RIGHT_ID);
+		intakeUpBackLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_BACK_LEFT_ID);
+		intakeUpBackRight = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_BACK_RIGHT_ID);
 
 		// Setup the brake modes on the intake
 		intakeLeft.setNeutralMode(NeutralMode.Brake);
 		intakeRight.setNeutralMode(NeutralMode.Brake);
-		intakeUpLeft.setNeutralMode(NeutralMode.Brake);
-		intakeUpRight.setNeutralMode(NeutralMode.Brake);
+		intakeUpFrontLeft.setNeutralMode(NeutralMode.Brake);
+		intakeUpFrontRight.setNeutralMode(NeutralMode.Brake);
+		intakeUpBackLeft.setNeutralMode(NeutralMode.Brake);
+		intakeUpBackRight.setNeutralMode(NeutralMode.Brake);
 
 		// Set the intake's inversion options
 		intakeLeft.setInverted(Constants.TALON_INTAKE_LEFT_INVERTED);
 		intakeRight.setInverted(Constants.TALON_INTAKE_RIGHT_INVERTED);
-		intakeUpLeft.setInverted(Constants.TALON_INTAKE_UP_LEFT_INVERTED);
-		intakeUpRight.setInverted(Constants.TALON_INTAKE_UP_RIGHT_INVERTED);
+		intakeUpFrontLeft.setInverted(Constants.TALON_INTAKE_UP_FRONT_LEFT_INVERTED);
+		intakeUpFrontRight.setInverted(Constants.TALON_INTAKE_UP_FRONT_RIGHT_INVERTED);
+		intakeUpBackLeft.setInverted(Constants.TALON_INTAKE_UP_BACK_LEFT_INVERTED);
+		intakeUpBackRight.setInverted(Constants.TALON_INTAKE_UP_BACK_RIGHT_INVERTED);
 
 		intake = new SpeedControllerGroup(intakeLeft, intakeRight);
-		intakeUp = new SpeedControllerGroup(intakeUpLeft, intakeUpRight);
+		intakeUp = new SpeedControllerGroup(intakeUpFrontLeft, intakeUpFrontRight, intakeUpBackLeft, intakeUpBackRight);
 
 		// intakeUpRight.set(0.0);
 
@@ -49,11 +55,7 @@ public class Intake {
 		intakeStop = new DigitalInput(0);
 		cubeDetector = new DigitalInput(1);
 
-		potent = new Titan.Pot(0);
-		potent.setMinPotValue(0.0);
-		potent.setMaxPotValue(5.0);
-		potent.setMinAngle(0.0);
-		potent.setMaxAngle(270.0);
+		lidar = new Titan.Lidar(0);
 	}
 
 	public boolean hasCube() {
@@ -61,11 +63,11 @@ public class Intake {
 	}
 
 	public boolean isDown() {
-		return intakeStop.get();
+		return !intakeStop.get();
 	}
 
 	public double getUpPos() {
-		return potent.getAngle();
+		return lidar.getDistance();
 	}
 
 	public void setUpSpeed(final double speed) {
@@ -81,7 +83,15 @@ public class Intake {
 	}
 
 	public void stopIntake() {
-		setIntakeSpeed(0.0);
+		setIntakeSpeed(0.08);
+	}
+	
+	public void setWantedDistance(final double dis) {
+		wantedDistance = dis;
+	}
+	
+	public void resetWantedDistance() {
+		wantedDistance = -1;
 	}
 
 	public void update(final Robot robot) {
@@ -89,9 +99,16 @@ public class Intake {
 		SmartDashboard.putBoolean("HasCube", hasCube());
 		SmartDashboard.putNumber("UpPot", getUpPos());
 		SmartDashboard.putNumber("IntakeLeftVolts", intakeLeft.getMotorOutputVoltage());
-		if (isDown()) {
-			stopUp();
-			potent.resetAngle();
+		
+		if(wantedDistance >= 0) {
+			final double distance = lidar.getDistance();
+			if(!Titan.approxEquals(distance, wantedDistance, 0.1)) {
+				if(wantedDistance > distance) {
+					setUpSpeed(0.5);
+				}else if(wantedDistance < distance) {
+					setUpSpeed(-0.5);
+				}
+			}
 		}
 	}
 }

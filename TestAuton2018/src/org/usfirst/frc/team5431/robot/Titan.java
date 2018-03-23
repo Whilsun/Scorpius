@@ -6,7 +6,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalSource;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -42,6 +46,20 @@ public final class Titan {
 	 */
 	public static class Joystick extends edu.wpi.first.wpilibj.Joystick {
 		private double deadzoneMin = 0.0f, deadzoneMax = 0.0f;
+		
+		public interface AxisZone{
+        }
+        
+        public interface ButtonZone {
+        }
+
+        public double getRawAxis(final AxisZone value) {
+            return getRawAxis(((Enum<?>) value).ordinal());
+        }
+
+        public boolean getRawButton(final ButtonZone value) {
+            return getRawButton(((Enum<?>) value).ordinal());
+        }
 
 		public Joystick(final int port) {
 			super(port);
@@ -81,26 +99,18 @@ public final class Titan {
 				return val;
 			}
 		}
-
-		public double getRawAxis(final Enum<?> value) {
-			return getRawAxis(value.ordinal());
-		}
-
-		public boolean getRawButton(final Enum<?> value) {
-			return getRawButton(value.ordinal() + 1);
-		}
 	}
 
 	public static class FSi6S extends Titan.Joystick {
-		public static enum SwitchPosition {
+        public enum SwitchPosition implements ButtonZone {
 			DOWN, NEUTRAL, UP
 		}
 
-		public static enum Switch {
+        public enum Switch implements ButtonZone {
 			A, B, C, D
 		}
 
-		public static enum Axis {
+        public enum Axis implements AxisZone {
 			RIGHT_X, RIGHT_Y, LEFT_Y, LEFT_X
 		}
 
@@ -148,31 +158,30 @@ public final class Titan {
 	}
 
 	public static class Xbox extends Titan.Joystick {
-		public static enum Button {
-			// ordered correctly, so ordinal reflects real mapping
-			A, B, X, Y, BUMPER_L, BUMPER_R, BACK, START;
-		}
+        public Xbox(int port) {
+            super(port);
+        }
 
-		public static enum Axis {
-			LEFT_X, LEFT_Y, TRIGGER_LEFT, TRIGGER_RIGHT, RIGHT_X, RIGHT_Y
-		}
+        public enum Button implements ButtonZone {
+            // ordered correctly, so ordinal reflects real mapping
+            A, B, X, Y, BUMPER_L, BUMPER_R, BACK, START
+        }
 
-		public Xbox(int port) {
-			super(port);
-		}
-	}
+        public enum Axis implements AxisZone {
+            LEFT_X, LEFT_Y, TRIGGER_LEFT, TRIGGER_RIGHT, RIGHT_X, RIGHT_Y
+        }
+    }
 	
 	public static class LogitechExtreme3D extends Titan.Joystick {
-		public static enum Button {
-			// ordered correctly, so ordinal reflects real mapping
-			TRIGGER, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, TEN, ELEVEN, TWELVE
+		public static enum Button implements ButtonZone{
+			TRIGGER, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, ELEVEN, TWELVE;
 		}
-
-		public static enum Axis {
-			X, Y, Z, SLIDER
+		
+		public static enum Axis implements AxisZone {
+			X, Y, Z, SLIDER;
 		}
-
-		public LogitechExtreme3D(int port) {
+		
+		public LogitechExtreme3D(final int port) {
 			super(port);
 		}
 	}
@@ -181,24 +190,28 @@ public final class Titan {
 		private final Map<Integer, Supplier<CommandQueue<T>>> assignments = new HashMap<>();
 		private final CommandQueue<T> currentQueue = new CommandQueue<>();
 
-		public AssignableJoystick(int port) {
-			super(port);
+		public void update(final T robot) {
+            //Update all of the button commands
+            for (final Integer button : assignments.keySet()) {
+                getRawButton(button, true); //Call the queue update on the specified button
+            }
+
+			currentQueue.update(robot);
 		}
-		
-		public void periodic(final T robot) {
-			currentQueue.periodic(robot);
-		}
-		
-		@Override
-		public boolean getRawButton(final int but) {
+
+        public AssignableJoystick(final int port) {
+            super(port);
+        }
+
+        public boolean getRawButton(final int but, boolean update) {
 			final boolean value = super.getRawButton(but);
-			if(assignments.containsKey(but) && value) {
+            if (assignments.containsKey(but) && value && update) {
 				currentQueue.clear();
-				
+
 				//call the associated function from the index in the map and then add it to the queue
 				currentQueue.addAll(assignments.get(but).get());//get
 			}
-			
+
 			return value;
 		}
 
@@ -206,8 +219,8 @@ public final class Titan {
 			assignments.put(button, generator);
 		}
 
-		public void assign(final Enum<?> button, final Supplier<CommandQueue<T>> generator) {
-			assign(button.ordinal(), generator);
+        public void assign(final ButtonZone button, final Supplier<CommandQueue<T>> generator) {
+            assign(((Enum<?>) button).ordinal(), generator);
 		}
 	}
 
@@ -228,61 +241,6 @@ public final class Titan {
 		}
 	}
 
-	public static class Drive {
-		public enum DriveType {
-			TANK
-		}
-		
-		public interface SensorSource {
-			double getAngle();
-		}
-		
-		private DriveType driveType = DriveType.TANK;
-		private SensorSource sSource= null;
-		
-		public Drive() {
-			driveType = DriveType.TANK;
-			sSource = new SensorSource() {
-				@Override
-				public double getAngle() {
-					return 0; //Don't have any angle correction
-				}
-			};
-		}
-		
-		public Drive(DriveType dType) {
-			driveType = dType;
-			sSource = new SensorSource() {
-				@Override
-				public double getAngle() {
-					return 0; //Don't have any angle correction
-				}
-			};
-		}
-		
-		public Drive(DriveType dType, SensorSource source) {
-			driveType = dType;
-			sSource = source;
-		}
-		
-		public void setDriveType(DriveType dType) {
-			driveType = dType;
-		}
-		
-		public void setSensorSource(SensorSource source) {
-			sSource = source;
-		}
-		
-		public void periodic() {
-			final double angle = sSource.getAngle();
-			switch(driveType) {
-			case TANK:
-				
-				break;
-			}
-		}
-	}
-	
 	public static class Pot extends AnalogInput {
 		private double minAngle = 0, maxAngle = 180;
 		private double minPotValue = 0, maxPotValue = 4096;
@@ -345,19 +303,52 @@ public final class Titan {
 					+ minOutputValue;
 		}
 	}
+	
+	public static class Lidar extends Counter{
+		private int calibrationOffset = 0;
+		
+		public Lidar(final int source) {
+			this(new DigitalInput(source));
+		}
+		
+		public Lidar(final DigitalSource source) {
+			super(source);
+			setMaxPeriod(1.0);
+			setSemiPeriodMode(true);
+			setSamplesToAverage(100);
+			reset();
+		}
+		
+		public int getCalibrationOffset() {
+			return calibrationOffset;
+		}
+
+		public void setCalibrationOffset(final int calibrationOffset) {
+			this.calibrationOffset = calibrationOffset;
+		}
+		/*
+		 * @return distance in cm*/
+		public double getDistance() {
+			if(get() < 1) {
+				return 0;
+			}
+			
+			return ((getPeriod() * 1000000.0 / 10.0) * calibrationOffset) * 0.39370079;
+		}
+	}
 
 	public static abstract class Command<T> {
 		public String name = "Command";
 		public String properties = "None";
 		public long startTime = 0;
 
-		public static enum CommandResult {
+        public abstract void init(final T robot);
+
+        public enum CommandResult {
 			IN_PROGRESS, COMPLETE, CLEAR_QUEUE, RESTART_COMMAND
-		};
+        }
 
-		public abstract void init(final T robot);
-
-		public abstract CommandResult periodic(final T robot);
+		public abstract CommandResult update(final T robot);
 
 		public abstract void done(final T robot);
 
@@ -381,6 +372,88 @@ public final class Titan {
 			return getElapsed() / 1000.0;
 		}
 	}
+	
+	public static class WaitCommand<T> extends Titan.Command<T> {
+
+		private final long durationMS;
+		private long startTime;
+		
+		public WaitCommand(final long ms) {
+			name = "WaitStep";
+			properties = String.format("Millis %d", ms);
+			durationMS = ms;
+		}
+
+		@Override
+		public void init(final T robot) {
+			startTime = System.currentTimeMillis();
+		}
+
+		@Override
+		public CommandResult update(final T robot) {
+			if (System.currentTimeMillis() >= startTime + durationMS) {
+				return CommandResult.COMPLETE;
+			}
+
+			return CommandResult.IN_PROGRESS;
+		}
+
+		@Override
+		public void done(final T robot) {
+		}
+	}
+	
+	public static class ClearQueueCommand<T> extends Titan.Command<T>{
+
+		@Override
+		public void init(final T robot) {
+		}
+
+		@Override
+		public CommandResult update(final T robot) {
+			return CommandResult.CLEAR_QUEUE;
+		}
+
+		@Override
+		public void done(final T robot) {
+		}
+	}
+	
+	public static class SpeedCommand<T> extends Titan.Command<T> {
+		private final SpeedController controller;
+		private final double speed;
+		private final long durationMS;
+		private long startTime;
+		
+		public SpeedCommand(final double speed, final long durationMS, final SpeedController controller) {
+			this.controller = controller;
+			this.speed = speed;
+			this.durationMS = durationMS;
+		}
+
+		@Override
+		public void init(final T robot) {
+			startTime = System.currentTimeMillis();
+		}
+
+		@Override
+		public CommandResult update(T robot) {
+			controller.set(speed);
+			
+			if (System.currentTimeMillis() >= startTime + durationMS) {
+				return CommandResult.COMPLETE;
+			}
+
+			return CommandResult.IN_PROGRESS;
+		}
+
+		@Override
+		public void done(final T robot) {
+		}
+		
+		
+	}
+
 
 	public static class CommandQueue<T> extends LinkedList<Command<T>> {
 		/**
@@ -401,13 +474,13 @@ public final class Titan {
 		/*
 		 * Returns false if there are no more steps to complete
 		 */
-		public boolean periodic(final T robot) {
+		public boolean update(final T robot) {
 			if (isEmpty()) {
 				return false;
 			}
 
 			final Command<T> command = peek();
-			final Titan.Command.CommandResult result = command.periodic(robot);
+			final Titan.Command.CommandResult result = command.update(robot);
 			if (result == Titan.Command.CommandResult.IN_PROGRESS) {
 				return true;
 			} else {
@@ -440,7 +513,7 @@ public final class Titan {
 	public static class GameData {
 		private String gameData = "";
 
-		public static enum Position {
+        public enum Position {
 			LEFT, RIGHT, ERROR;
 
 			static Position fromGameData(final char value) {
@@ -454,17 +527,17 @@ public final class Titan {
 			}
 		}
 
-		public static enum FieldObject {
+        public enum FieldObject {
 			SWITCH, SCALE, OPPONENT_SWITCH
 		}
 
-		public static interface SideChooser {
+        public interface SideChooser {
 			void left();
 
 			void right();
 		}
 
-		public static interface ErrorChooser {
+        public interface ErrorChooser {
 			void noData();
 		}
 

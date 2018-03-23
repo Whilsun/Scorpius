@@ -20,7 +20,7 @@ public class WaitCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		if (System.currentTimeMillis() >= startTime + durationMS) {
 			return CommandResult.COMPLETE;
 		}

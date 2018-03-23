@@ -36,7 +36,7 @@ public class PathfindingCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		boolean nextStep = true;
 		try {
 			Stepper step = steps.get(currentStep);

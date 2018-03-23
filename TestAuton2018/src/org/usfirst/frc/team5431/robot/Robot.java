@@ -24,7 +24,7 @@ import org.usfirst.frc.team5431.robot.auton.WaitCommand;
 import org.usfirst.frc.team5431.robot.components.Climber;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
-import org.usfirst.frc.team5431.robot.components.Intake;
+import org.usfirst.frc.team5431.robot.components.Elevator;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
@@ -38,7 +38,7 @@ public class Robot extends IterativeRobot {
 	private final DriveBase driveBase = new DriveBase();
 	private final Climber climber = new Climber();
 	private final Teleop teleop = new Teleop();
-	private final Intake intake = new Intake();
+	private final Elevator intake = new Elevator();
 
 	public enum AutonPriority {
 		AUTO_LINE, SWITCH, SCALE, SWITCH_SCALE
@@ -220,7 +220,7 @@ public class Robot extends IterativeRobot {
 		return climber;
 	}
 
-	public Intake getIntake() {
+	public Elevator getIntake() {
 		return intake;
 	}
 

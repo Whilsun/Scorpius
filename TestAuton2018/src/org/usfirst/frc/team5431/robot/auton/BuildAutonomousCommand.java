@@ -22,7 +22,7 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 	}
 
 	@Override
-	public CommandResult periodic(final Robot robot) {
+	public CommandResult update(final Robot robot) {
 		return CommandResult.COMPLETE;
 	}
 
