@@ -48,8 +48,8 @@ public class Intake {
 		intakeLeft.setNeutralMode(NeutralMode.Brake);
 		intakeRight.setNeutralMode(NeutralMode.Brake);
 		intakePincher.setNeutralMode(NeutralMode.Brake);
-		intakeUpLeft.setNeutralMode(NeutralMode.Brake);
-		intakeUpRight.setNeutralMode(NeutralMode.Brake);
+		intakeUpLeft.setNeutralMode(NeutralMode.Coast);
+		intakeUpRight.setNeutralMode(NeutralMode.Coast);
 
 		// Set the intake's inversion options
 		intakeLeft.setInverted(Constants.TALON_INTAKE_LEFT_INVERTED);
@@ -88,8 +88,8 @@ public class Intake {
 		intakePincher.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
 		// intakePincher.setSelectedSensorPosition(0, 0, 0);
 		intakePincher.setSensorPhase(true);
-		intakePincher.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
-				LimitSwitchNormal.NormallyOpen, 0);
+		intakePincher.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		intakePincher.configForwardSoftLimitEnable(true, 0);
 		intakePincher.configReverseSoftLimitThreshold(-700, 0);
 		intakePincher.configReverseSoftLimitEnable(true, 0);
 
@@ -151,13 +151,22 @@ public class Intake {
 	}
 	
 	public void recalibrate() {
-		if(isDown()) {
-			setUpPos(0);
-			stayDown();
-		} else {
-			setUpPos(Constants.ENCODER_INTAKE_UP_POSITION);
-			stayUp();
+		if(!isClosed() && !hasCube()){
+			for(int ind = 0; ind < 2; ind++) {
+				if(isClosed()) break;
+				pinch(-1.0);
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+	}
+	
+	public void zeroEverything() {
+		intakePincher.getSensorCollection().setQuadraturePosition(0, 0);
+		setUpPos(Constants.ENCODER_AUTONOMOUS_START_POSITION);
 	}
 	
 	public void stayInPosition() {
@@ -242,7 +251,7 @@ public class Intake {
 	}
 
 	public void intakeShoot() {
-		intake.set(-0.9);
+		intake.set(-1.0);
 	}
 
 	public void intakeStop() {
@@ -254,11 +263,11 @@ public class Intake {
 	}
 
 	public void pinchStayUp() {
-		pinch(-0.08);
+		pinch(-0.13);
 	}
 	
 	public void pinchHold() {
-		pinch(-0.14);
+		pinch(-0.2);
 	}
 
 	public void pinchSoft() {
@@ -282,13 +291,17 @@ public class Intake {
 		intakePincher.set(0.25);
 	}
 	
+	public void releaseSlow() {
+		intakePincher.set(0.1);
+	}
+	
 	public void releaseFast() {
 		intakePincher.set(0.5);
 	}
 
-	public void stopPinch() {
+	/*public void stopPinch() {
 		intakePincher.set(0.0);
-	}
+	}*/
 	
 	public IntakeState getState() {
 		return state;
@@ -398,11 +411,12 @@ public class Intake {
 			if (isSwitch()) {
 				moveStart = 0;
 				
-				pinchSoft();
 				goSwitch();
 				if(hasCube()) {
+					pinchHard();
 					intakeShoot();
 				} else {
+					pinchSoft();
 					state = IntakeState.SHOOT_PROGRESS;
 					cubeShoot = System.currentTimeMillis();
 					intakeStop();
@@ -443,24 +457,24 @@ public class Intake {
 				final long timeDiff = System.currentTimeMillis() - cubeStart;
 				if (timeDiff < 200 || isCapturePressed) { // Pinch hard and fast for 500 milliseconds
 					intakeFast(); // Quickly suck the cube to the back of the intake
-					if(Titan.approxEquals(timeDiff % 800, 0, 10)) {
+					if(Titan.approxEquals(timeDiff % 700, 0, 10)) {
 						captureDirection = !captureDirection;
 					}
 					
 					if(captureDirection) {
-						release(); // Pinch harder to straigten out the cube
+						releaseSlow(); // Pinch harder to straigten out the cube
 					} else {
 						pinchHard();
 					}
 				} else if(timeDiff > 200 && timeDiff < 400 &&!isCapturePressed) {
-					intakeSlow(); // Intake the cube so that it sits flush with the back of the intake
-					pinchSoft(); // Pinch to hold the cube while it's going up
+					intakeFast(); // Intake the cube so that it sits flush with the back of the intake
+					pinchHard(); // Pinch to hold the cube while it's going up
 				} else if(timeDiff > 400 && (captureDirection) && !isCapturePressed) {
 					intakeSlow();
 					pinchHard();
 				} else {
 					intakeHold();
-					pinchHold();
+					pinchSoft();
 					cubeStart = 0;
 					state = IntakeState.STAY_DOWN;
 				}
@@ -482,7 +496,7 @@ public class Intake {
 				moveStart = 0; // Reset the lower start if the catapult isn't already lowered
 			if(isUp()) { //If it's in the catapult then hold onto the cube
 				goUp();
-				pinchStayUp();
+				pinchHold();
 				if(hasCube()) {
 					intakeHold();
 				} else {
@@ -514,7 +528,7 @@ public class Intake {
 					if(isBelowSwitch()) { //Pinch it hard the first little bit
 						pinchHard();
 					} else { //Then pinch softly at the top
-						pinchSoft();
+						pinchHard(); //Soft();
 					}
 				} else {
 					goUp();
@@ -554,8 +568,7 @@ public class Intake {
 				cubeShoot = System.currentTimeMillis();
 			}
 			
-			///intakeReverseSlow(); //UNCOMMENT THIS WHEN THERE'S THE CLIMBER
-			intakeStop();
+			intakeReverseSlow();
 			if((System.currentTimeMillis() - cubeShoot) < 400) {
 				releaseFast();
 			} else {

@@ -215,6 +215,13 @@ public class DriveBase {
 		frontRight.setInverted(Constants.TALON_FRONT_RIGHT_INVERTED);
 		middleRight.setInverted(Constants.TALON_MIDDLE_RIGHT_INVERTED);
 		backRight.setInverted(Constants.TALON_BACK_RIGHT_INVERTED);
+		
+		frontLeft.configOpenloopRamp(0, 0);
+		middleLeft.configOpenloopRamp(0, 0);
+		backLeft.configOpenloopRamp(0, 0);
+		frontRight.configOpenloopRamp(0, 0);
+		middleRight.configOpenloopRamp(0, 0);
+		backRight.configOpenloopRamp(0, 0);
 
 		/*
 		 * MASTER-SLAVE RELATIONSHIPS

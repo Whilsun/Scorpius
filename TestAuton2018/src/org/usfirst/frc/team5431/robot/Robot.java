@@ -87,6 +87,8 @@ public class Robot extends IterativeRobot {
 		waitChooser.addObject("Three", 3);
 		waitChooser.addObject("Four", 4);
 		waitChooser.addObject("Five", 5);
+		waitChooser.addObject("Six", 6);
+		waitChooser.addObject("Seven", 7);
 		SmartDashboard.putData("AutonWait", waitChooser);
 
 		// Add the driveBase PID Source
@@ -143,6 +145,7 @@ public class Robot extends IterativeRobot {
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
 		intake.stayInPosition();
+		intake.recalibrate();
 	}
 
 	@Override

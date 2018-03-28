@@ -1,5 +1,6 @@
 package org.usfirst.frc.team5431.robot.auton;
 
+import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.Intake.IntakeState;
@@ -14,6 +15,7 @@ public class SwitchCubeCommand extends Titan.Command<Robot>{
 		shootingCube = false;
 		
 		//Start the intake shoot state machine
+		robot.getIntake().setUpPos(Constants.ENCODER_AUTONOMOUS_START_POSITION - 100);
 		robot.getDriveBase().drive(-0.15, -0.15);
 	}
 

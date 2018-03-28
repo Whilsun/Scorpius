@@ -36,7 +36,7 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 		final Titan.GameData game = robot.getGameData();
 		final Titan.CommandQueue<Robot> aSteps = robot.getAutonSteps();
 		if(priority == AutonPriority.AUTO_LINE) {
-			aSteps.add(new DriveCommand(120, 0.0, 5000)); //Five second timeout
+			aSteps.add(new DriveCommand(-150, 0.0, 5000)); //Five second timeout
 		} else {
 			switch(position) {
 			case CENTER: {
@@ -47,14 +47,14 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 							game.runSide(new SideChooser() {
 								@Override
 								public void left() {
-									aSteps.add(new DriveCommand(-48, -63.5));
-									aSteps.add(new DriveCommand(-48, 78, 3000));
+									aSteps.add(new DriveCommand(-53, -63.5, 2000));
+									aSteps.add(new DriveCommand(-43.5, 78, 2000));
 								}
 	
 								@Override
 								public void right() {
-									aSteps.add(new DriveCommand(-64.0, 21.0));
-									aSteps.add(new DriveCommand(-33, -72.0, 3000)); //Three second timeout
+									aSteps.add(new DriveCommand(-64.0, 21.0, 2000));
+									aSteps.add(new DriveCommand(-32.5, -72.0, 3000)); //Three second timeout
 								}
 							});
 							aSteps.add(new SwitchCubeCommand());
@@ -88,7 +88,7 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 							});
 						}
 						break;
-					case SCALE: {
+					case SCALE: { 
 							game.setSelectedObject(FieldObject.SCALE);
 							game.runSide(new SideChooser() {
 								@Override

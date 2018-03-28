@@ -6,7 +6,6 @@ import org.usfirst.frc.team5431.robot.Titan.Xbox.Button;
 public final class Teleop {
 	private final Titan.Xbox driver;
 	private Titan.Xbox operator;
-	private final Titan.Toggle cubeCaptureToggle = new Titan.Toggle();
 
 	public Teleop() {
 		driver = new Titan.Xbox(0);
@@ -65,6 +64,12 @@ public final class Teleop {
 		
 		if(operator.getRawButton(Button.B)) {
 			robot.getIntake().stayDown();
+		}
+		
+		if(operator.getRawButton(Button.START)) {
+			robot.getIntake().zeroEverything();
+			robot.getIntake().stayDown();
+			robot.getIntake().recalibrate();
 		}
 		
 		//if(operator.getRawButton(button))
