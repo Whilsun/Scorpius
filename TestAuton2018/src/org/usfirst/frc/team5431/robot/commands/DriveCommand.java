@@ -1,9 +1,8 @@
-package org.usfirst.frc.team5431.robot.auton;
+package org.usfirst.frc.team5431.robot.commands;
 
 import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
-import org.usfirst.frc.team5431.robot.Titan.Command.CommandResult;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
@@ -27,7 +26,7 @@ public class DriveCommand extends Titan.Command<Robot> {
 		else
 			speed = spd;
 
-		name = "DriveStep";
+		name = "DriveCommand";
 		properties = String.format("Distance %.2f : Heading %.2f", distance, angle);
 	}
 

@@ -10,25 +10,28 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 
 public class Mimic {
 	public static final String mimicFile = "/media/sda1/%s.mimic";
-	public static final String formatString = "%.2f,%.2f,%.2f,%.4f,%.4f,%d,%d\n"; //LEFT ENCODER, RIGHT ENCODER, GYRO ANGLE, LEFT POWER, RIGHT POWER, HOME, SWITCH SHOOT
+	public static final String formatString = "%.2f,%.2f,%.2f,%.4f,%.4f,%d,%.2f,%.2f,%.2f\n"; //LEFT ENCODER, RIGHT ENCODER, GYRO ANGLE, LEFT POWER, RIGHT POWER, HOME, ELEVATOR_HEIGHT, INTAKE_TILT, INTAKE_SPEED
 	
 	public static class Stepper {
-		public double leftDistance, rightDistance, angle, leftPower, rightPower;
-		public boolean isHome, isSwitch;
+		public double leftDistance, rightDistance, angle, leftPower, rightPower, elevatorHeight, intakeTilt, intakeSpeed;
+		public boolean isHome;
 		
-		public Stepper(final double lD, final double rD, final double a, final double lP, final double rP, final boolean h, final boolean sw) {
+		public Stepper(final double lD, final double rD, final double a, final double lP, final double rP, final boolean h, final double eH, final double iT, final double iS) {
 			leftDistance = lD;
 			rightDistance = rD;
 			angle = a;
 			leftPower = lP;
 			rightPower = rP;
 			isHome = h;
-			isSwitch = sw;
+			elevatorHeight = eH;
+			intakeTilt = iT;
+			intakeSpeed = iS;
 		}
 		
 		public Stepper(final String toParse) {
@@ -40,7 +43,9 @@ public class Mimic {
 				leftPower = getDouble(parts[3]);
 				rightPower = getDouble(parts[4]);
 				isHome = getBoolean(parts[5]); 
-				isSwitch = getBoolean(parts[6]);
+				elevatorHeight = getDouble(parts[6]);
+				intakeTilt = getDouble(parts[7]);
+				intakeSpeed = getDouble(parts[8]);
 			} catch (Exception e) {
 				Titan.ee("MimicParse", e);
 			}
@@ -71,14 +76,13 @@ public class Mimic {
 		}
 		
 		public String toString() {
-			return String.format(formatString, leftDistance, rightDistance, angle, leftPower, rightPower, (isHome) ? 1 : 0, (isSwitch) ? 1 : 0);
+			return String.format(formatString, leftDistance, rightDistance, angle, leftPower, rightPower, (isHome) ? 1 : 0, elevatorHeight, intakeTilt, intakeSpeed);
 		}
 	}
 	
 	public static class Observer {
 		private static FileOutputStream log = null;
 		private static boolean homed = false;
-		private static boolean switched = false;
 		private static boolean saved = true;
 		
 		public static void prepare(final String fileName) {
@@ -102,25 +106,21 @@ public class Mimic {
 				final float angle = robot.getDriveBase().getNavx().getYaw();
 				final double leftPower = driveVals[0];
 				final double rightPower = driveVals[1];
-				boolean home = robot.getTeleop().getXbox().getRawButton(Titan.Xbox.Button.START);
-				boolean switchShoot = robot.getTeleop().getXbox().getRawAxis(Titan.Xbox.Axis.TRIGGER_RIGHT) > 0.5;
+				boolean home = robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.FIVE);
+				final double elevatorHeight = robot.getElevator().getUpPos();
+				final double intakeTilt = robot.getIntake().getTiltPosition();
+				double intakeSpeed = Constants.INTAKE_STOPPED_SPEED;
+				if(robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
+					intakeSpeed = Constants.OUTTAKE_SPEED;
+				} else if(robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.THREE)) {
+					intakeSpeed = Constants.INTAKE_SPEED;
+				}
 				
 				if(home && !homed) {
 					robot.getDriveBase().setHome();
 				}
-				
-				if(switchShoot && !switched) {
-//					robot.getIntake().shootCube();
-					switchShoot = true;
-				} else switchShoot = false;
-				
-				//@TODO FIX THE CRAP
-//				if(robot.getIntake().getState() == IntakeState.STAY_UP || switchShoot) {
-//					if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower, home, switchShoot).toString().getBytes(StandardCharsets.US_ASCII));	
-//				}
-//				
+				if(!saved) log.write(new Stepper(lDistance, rDistance, angle, leftPower, rightPower, home, elevatorHeight, intakeTilt, intakeSpeed).toString().getBytes(StandardCharsets.US_ASCII));
 				homed = home;
-				switched = switchShoot;
 			} catch (Exception e) {
 				Titan.ee("Mimic", e);
 			}

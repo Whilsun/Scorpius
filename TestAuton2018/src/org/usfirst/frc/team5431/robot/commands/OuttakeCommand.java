@@ -1,35 +1,35 @@
-package org.usfirst.frc.team5431.robot.auton;
+package org.usfirst.frc.team5431.robot.commands;
 
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 
-public class WaitCommand extends Titan.Command<Robot> {
+public class OuttakeCommand extends Titan.Command<Robot>{
 
 	private final long durationMS;
-	private long startTime;
 	
-	public WaitCommand(final long ms) {
-		name = "WaitStep";
-		properties = String.format("Millis %d", ms);
-		durationMS = ms;
+	public OuttakeCommand(final long duration) {
+		name = "OuttakeCommand";
+		properties = String.format("Duration: %d (ms)", duration);
+		durationMS = duration;
 	}
-
+	
 	@Override
 	public void init(final Robot robot) {
-		startTime = System.currentTimeMillis();
+		robot.getIntake().outtake();
 	}
 
 	@Override
 	public CommandResult update(final Robot robot) {
-		if (System.currentTimeMillis() >= startTime + durationMS) {
+		if(getElapsed() > durationMS) {
 			return CommandResult.COMPLETE;
 		}
-
+		
 		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override
 	public void done(final Robot robot) {
+		robot.getIntake().stopIntake();
 	}
 
 }

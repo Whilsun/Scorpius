@@ -42,7 +42,8 @@ public class CubeDetector implements VisionPipeline {
 	/**
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
-	@Override	public void process(Mat source0) {
+	@Override	
+	public void process(Mat source0) {
 		// Step CV_medianBlur0:
 		Mat cvMedianblurSrc = source0;
 		double cvMedianblurKsize = 29.0;

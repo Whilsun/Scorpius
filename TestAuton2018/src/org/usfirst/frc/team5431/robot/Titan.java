@@ -1,11 +1,15 @@
 package org.usfirst.frc.team5431.robot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.AnalogTrigger;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalSource;
@@ -46,20 +50,20 @@ public final class Titan {
 	 */
 	public static class Joystick extends edu.wpi.first.wpilibj.Joystick {
 		private double deadzoneMin = 0.0f, deadzoneMax = 0.0f;
-		
-		public interface AxisZone{
-        }
-        
-        public interface ButtonZone {
-        }
 
-        public double getRawAxis(final AxisZone value) {
-            return getRawAxis(((Enum<?>) value).ordinal());
-        }
+		public interface AxisZone {
+		}
 
-        public boolean getRawButton(final ButtonZone value) {
-            return getRawButton(((Enum<?>) value).ordinal());
-        }
+		public interface ButtonZone {
+		}
+
+		public double getRawAxis(final AxisZone value) {
+			return getRawAxis(((Enum<?>) value).ordinal());
+		}
+
+		public boolean getRawButton(final ButtonZone value) {
+			return getRawButton(((Enum<?>) value).ordinal() + 1);
+		}
 
 		public Joystick(final int port) {
 			super(port);
@@ -102,15 +106,15 @@ public final class Titan {
 	}
 
 	public static class FSi6S extends Titan.Joystick {
-        public enum SwitchPosition implements ButtonZone {
+		public enum SwitchPosition implements ButtonZone {
 			DOWN, NEUTRAL, UP
 		}
 
-        public enum Switch implements ButtonZone {
+		public enum Switch implements ButtonZone {
 			A, B, C, D
 		}
 
-        public enum Axis implements AxisZone {
+		public enum Axis implements AxisZone {
 			RIGHT_X, RIGHT_Y, LEFT_Y, LEFT_X
 		}
 
@@ -158,29 +162,29 @@ public final class Titan {
 	}
 
 	public static class Xbox extends Titan.Joystick {
-        public Xbox(int port) {
-            super(port);
-        }
+		public Xbox(int port) {
+			super(port);
+		}
 
-        public enum Button implements ButtonZone {
-            // ordered correctly, so ordinal reflects real mapping
-            A, B, X, Y, BUMPER_L, BUMPER_R, BACK, START
-        }
+		public enum Button implements ButtonZone {
+			// ordered correctly, so ordinal reflects real mapping
+			A, B, X, Y, BUMPER_L, BUMPER_R, BACK, START
+		}
 
-        public enum Axis implements AxisZone {
-            LEFT_X, LEFT_Y, TRIGGER_LEFT, TRIGGER_RIGHT, RIGHT_X, RIGHT_Y
-        }
-    }
-	
+		public enum Axis implements AxisZone {
+			LEFT_X, LEFT_Y, TRIGGER_LEFT, TRIGGER_RIGHT, RIGHT_X, RIGHT_Y
+		}
+	}
+
 	public static class LogitechExtreme3D extends Titan.Joystick {
-		public static enum Button implements ButtonZone{
+		public static enum Button implements ButtonZone {
 			TRIGGER, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, ELEVEN, TWELVE;
 		}
-		
+
 		public static enum Axis implements AxisZone {
 			X, Y, Z, SLIDER;
 		}
-		
+
 		public LogitechExtreme3D(final int port) {
 			super(port);
 		}
@@ -191,25 +195,26 @@ public final class Titan {
 		private final CommandQueue<T> currentQueue = new CommandQueue<>();
 
 		public void update(final T robot) {
-            //Update all of the button commands
-            for (final Integer button : assignments.keySet()) {
-                getRawButton(button, true); //Call the queue update on the specified button
-            }
+			// Update all of the button commands
+			for (final Integer button : assignments.keySet()) {
+				getRawButton(button, true); // Call the queue update on the specified button
+			}
 
 			currentQueue.update(robot);
 		}
 
-        public AssignableJoystick(final int port) {
-            super(port);
-        }
+		public AssignableJoystick(final int port) {
+			super(port);
+		}
 
-        public boolean getRawButton(final int but, boolean update) {
+		public boolean getRawButton(final int but, boolean update) {
 			final boolean value = super.getRawButton(but);
-            if (assignments.containsKey(but) && value && update) {
+			if (assignments.containsKey(but) && value && update) {
 				currentQueue.clear();
 
-				//call the associated function from the index in the map and then add it to the queue
-				currentQueue.addAll(assignments.get(but).get());//get
+				// call the associated function from the index in the map and then add it to the
+				// queue
+				currentQueue.addAll(assignments.get(but).get());// get
 			}
 
 			return value;
@@ -219,8 +224,8 @@ public final class Titan {
 			assignments.put(button, generator);
 		}
 
-        public void assign(final ButtonZone button, final Supplier<CommandQueue<T>> generator) {
-            assign(((Enum<?>) button).ordinal(), generator);
+		public void assign(final ButtonZone button, final Supplier<CommandQueue<T>> generator) {
+			assign(((Enum<?>) button).ordinal(), generator);
 		}
 	}
 
@@ -303,14 +308,125 @@ public final class Titan {
 					+ minOutputValue;
 		}
 	}
-	
-	public static class Lidar extends Counter{
-		private int calibrationOffset = 0;
+
+	public static class HallFX {
+		private final AnalogTrigger trigger;
+		private final Counter halCount;
+		private double stepsPerRotation = 174.9;
+		private double lastSpeed = 10.0;
+		private int position = 0;
+		private boolean inverted = false;
+
+		public HallFX(final int port) {
+			trigger = new AnalogTrigger(port);
+			trigger.setLimitsVoltage(3.5, 3.8);
+			halCount = new Counter(trigger);
+		}
 		
+		public void setStepsPerRotation(double spr) {
+			stepsPerRotation = spr;
+		}
+		
+		public void setHalInverted(boolean inverted) {
+			this.inverted = inverted;
+		}
+		
+		public boolean getHalInverted() {
+			return inverted;
+		}
+
+		public int getPosition() {
+			final int hCount = (inverted) ? (-1 * halCount.get()) : halCount.get();
+			if (lastSpeed >= 0)
+				return position + hCount;
+			return position - hCount;
+		}
+		
+		public double getDegreesPerStep() {
+			return 360.0 / (double) stepsPerRotation;
+		}
+		
+		public double getAngle() {
+			return getPosition() * getDegreesPerStep();
+		}
+		
+		public void reset() {
+			position = 0;
+			halCount.reset();
+		}
+		
+		public void setHome(final int position, final double lastSpeed) {
+			this.position = position;
+			this.lastSpeed = lastSpeed;
+			halCount.reset();
+		}
+		
+		public double checkDirectionChange(final double newSpeed) {
+			if ((lastSpeed < 0 && newSpeed >= 0) || (lastSpeed >= 0 && newSpeed < 0)) {
+				position = getPosition();
+				halCount.reset();
+				lastSpeed = newSpeed;
+			}
+			return newSpeed;
+		}
+	}
+
+	public static class SeatMotor extends HallFX implements SpeedController {
+		private final SpeedController controller;
+
+		public SeatMotor(final SpeedController controller, final int hallPort) {
+			super(hallPort);
+			this.controller = controller;
+		}
+
+		public SpeedController getController() {
+			return controller;
+		}
+
+		@Override
+		public void set(final double speed) {
+			controller.set(checkDirectionChange(speed));
+		}
+
+		@Override
+		public void pidWrite(final double output) {
+			set(output);
+		}
+
+		@Override
+		public double get() {
+			return controller.get();
+		}
+
+		@Override
+		public void setInverted(final boolean isInverted) {
+			controller.setInverted(isInverted);
+		}
+
+		@Override
+		public boolean getInverted() {
+			return controller.getInverted();
+		}
+
+		@Override
+		public void disable() {
+			controller.disable();
+		}
+
+		@Override
+		public void stopMotor() {
+			controller.stopMotor();
+		}
+
+	}
+
+	public static class Lidar extends Counter {
+		private int calibrationOffset = 0;
+
 		public Lidar(final int source) {
 			this(new DigitalInput(source));
 		}
-		
+
 		public Lidar(final DigitalSource source) {
 			super(source);
 			setMaxPeriod(1.0);
@@ -318,7 +434,7 @@ public final class Titan {
 			setSamplesToAverage(100);
 			reset();
 		}
-		
+
 		public int getCalibrationOffset() {
 			return calibrationOffset;
 		}
@@ -326,14 +442,16 @@ public final class Titan {
 		public void setCalibrationOffset(final int calibrationOffset) {
 			this.calibrationOffset = calibrationOffset;
 		}
+
 		/*
-		 * @return distance in cm*/
+		 * @return distance in cm
+		 */
 		public double getDistance() {
-			if(get() < 1) {
-				return 0;
+			if (get() < 1) {
+				return 666;
 			}
-			
-			return ((getPeriod() * 1000000.0 / 10.0) * calibrationOffset) * 0.39370079;
+
+			return ((getPeriod() * 1000000.0 / 10.0) + calibrationOffset) * 0.39370079;
 		}
 	}
 
@@ -342,11 +460,11 @@ public final class Titan {
 		public String properties = "None";
 		public long startTime = 0;
 
-        public abstract void init(final T robot);
+		public abstract void init(final T robot);
 
-        public enum CommandResult {
+		public enum CommandResult {
 			IN_PROGRESS, COMPLETE, CLEAR_QUEUE, RESTART_COMMAND
-        }
+		}
 
 		public abstract CommandResult update(final T robot);
 
@@ -372,14 +490,66 @@ public final class Titan {
 			return getElapsed() / 1000.0;
 		}
 	}
-	
+
+	public static class ConcurrentCommand<T> extends Titan.Command<T> {
+		private final List<CommandQueue<T>> queues = new ArrayList<>();
+
+		@SafeVarargs
+		public ConcurrentCommand(final Command<T>... commands) {
+			this();
+			for (int i = 0; i < commands.length; ++i) {
+				addCommand(commands[i]);
+			}
+		}
+
+		public ConcurrentCommand() {
+			name = "ConcurrentCommand";
+			properties = queues.size() + " queues";
+		}
+
+		public void addQueue(final CommandQueue<T> queue) {
+			queues.add(queue);
+		}
+
+		public void addCommand(final Command<T> com) {
+			final CommandQueue<T> queue = new CommandQueue<>();
+			queue.add(com);
+			queues.add(queue);
+		}
+
+		@Override
+		public void init(final T robot) {
+		}
+
+		@Override
+		public CommandResult update(final T robot) {
+			final Iterator<CommandQueue<T>> queueIter = queues.iterator();
+			while (queueIter.hasNext()) {
+				final CommandQueue<T> queue = queueIter.next();
+				if (!queue.update(robot)) {
+					queueIter.remove();
+				}
+			}
+
+			if (queues.isEmpty()) {
+				return CommandResult.COMPLETE;
+			}
+
+			return CommandResult.IN_PROGRESS;
+		}
+
+		@Override
+		public void done(final T robot) {
+		}
+	}
+
 	public static class WaitCommand<T> extends Titan.Command<T> {
 
 		private final long durationMS;
 		private long startTime;
-		
+
 		public WaitCommand(final long ms) {
-			name = "WaitStep";
+			name = "WaitCommand";
 			properties = String.format("Millis %d", ms);
 			durationMS = ms;
 		}
@@ -402,8 +572,12 @@ public final class Titan {
 		public void done(final T robot) {
 		}
 	}
-	
-	public static class ClearQueueCommand<T> extends Titan.Command<T>{
+
+	public static class ClearQueueCommand<T> extends Titan.Command<T> {
+
+		public ClearQueueCommand() {
+			name = "ClearQueueCommand";
+		}
 
 		@Override
 		public void init(final T robot) {
@@ -418,14 +592,16 @@ public final class Titan {
 		public void done(final T robot) {
 		}
 	}
-	
+
 	public static class SpeedCommand<T> extends Titan.Command<T> {
 		private final SpeedController controller;
 		private final double speed;
 		private final long durationMS;
 		private long startTime;
-		
+
 		public SpeedCommand(final double speed, final long durationMS, final SpeedController controller) {
+			name = "SpeedCommand";
+			properties = "Speed: " + speed + ", duration: " + durationMS;
 			this.controller = controller;
 			this.speed = speed;
 			this.durationMS = durationMS;
@@ -439,7 +615,7 @@ public final class Titan {
 		@Override
 		public CommandResult update(T robot) {
 			controller.set(speed);
-			
+
 			if (System.currentTimeMillis() >= startTime + durationMS) {
 				return CommandResult.COMPLETE;
 			}
@@ -450,10 +626,7 @@ public final class Titan {
 		@Override
 		public void done(final T robot) {
 		}
-		
-		
 	}
-
 
 	public static class CommandQueue<T> extends LinkedList<Command<T>> {
 		/**
@@ -513,7 +686,7 @@ public final class Titan {
 	public static class GameData {
 		private String gameData = "";
 
-        public enum Position {
+		public enum Position {
 			LEFT, RIGHT, ERROR;
 
 			static Position fromGameData(final char value) {
@@ -527,17 +700,17 @@ public final class Titan {
 			}
 		}
 
-        public enum FieldObject {
+		public enum FieldObject {
 			SWITCH, SCALE, OPPONENT_SWITCH
 		}
 
-        public interface SideChooser {
+		public interface SideChooser {
 			void left();
 
 			void right();
 		}
 
-        public interface ErrorChooser {
+		public interface ErrorChooser {
 			void noData();
 		}
 

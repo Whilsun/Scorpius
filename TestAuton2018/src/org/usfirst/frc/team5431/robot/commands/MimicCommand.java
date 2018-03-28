@@ -1,4 +1,4 @@
-package org.usfirst.frc.team5431.robot.auton; //Change to allow negative distance values
+package org.usfirst.frc.team5431.robot.commands; //Change to allow negative distance values
 
 import java.util.ArrayList;
 
@@ -10,9 +10,9 @@ import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-public class MimicCommad extends Titan.Command<Robot> {
+public class MimicCommand extends Titan.Command<Robot> {
 	public static enum Paths {
-		RIGHT_SCALE
+		TEST_MIMIC_FILE, CENTER_LEFT_SWITCH, CENTER_RIGHT_SWITCH, LEFT_LEFT_SWITCH, RIGHT_RIGHT_SWITCH, LEFT_RIGHT_SWITCH, RIGHT_RIGHT_SCALE, RIGHT_TWO_CUBE_SWITCH
 	}
 	
 	private int currentStep = 0;
@@ -26,13 +26,12 @@ public class MimicCommad extends Titan.Command<Robot> {
 	private double futureRightIntegral = 1.0;
 	private final ArrayList<Stepper> steps;
 	
-	public MimicCommad(final Paths mimic) {
-		name = "PathfindingStep";
+	public MimicCommand(final Paths mimic) {
+		name = "MimicCommand";
 		
 		//Collect the mimic file
 		Mimic.Repeater.prepare(mimic.toString().toLowerCase());
 		steps = Mimic.Repeater.getData();
-		
 		properties = String.format("Steps %d", steps.size());
 	}
 	
@@ -54,15 +53,8 @@ public class MimicCommad extends Titan.Command<Robot> {
 		boolean nextStep = true;
 		try {
 			final Stepper step = steps.get(currentStep);
-			
 			if(step.isHome) {
 				robot.getDriveBase().reset(); //Do not call setHome because that disables PID
-			} else if(step.isSwitch) {
-//				robot.getIntake().shootCube();
-//				if(robot.getIntake().getState() != IntakeState.STAY_UP) {
-//					skippedSteps = 0;
-//					nextStep = false;
-//				}
 			} else {
 				final double power = (step.leftPower + step.rightPower) / 2.0;
 				
@@ -72,6 +64,9 @@ public class MimicCommad extends Titan.Command<Robot> {
 					nextStep = false;
 				}
 			}
+			robot.getElevator().setWantedHeight(step.elevatorHeight, true); //MIMIC OVERRIDE
+			robot.getIntake().setWantedTilt(step.intakeTilt);
+			robot.getIntake().setIntakeSpeed(step.intakeSpeed);
 		} catch (IndexOutOfBoundsException e) {}
 		if(nextStep || skippedSteps > 5) {
 			if(((currentStep++) + 1) > steps.size()) return CommandResult.COMPLETE;

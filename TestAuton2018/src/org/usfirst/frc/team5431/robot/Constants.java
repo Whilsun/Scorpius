@@ -18,8 +18,8 @@ public final class Constants {
 	/*
 	 * AUTONOMOUS
 	 */
-	public final static boolean AUTO_LOG_PATHFINDING = false;
-	public final static String AUTO_LOG_PATHFINDING_NAME = "right_scale";
+	public final static boolean AUTO_LOG_PATHFINDING = true;
+	public final static String AUTO_LOG_PATHFINDING_NAME = "right_switch";
 	public final static double AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED = 0.2; // This is the speed to override the
 																				// previous step
 	public final static double AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_DISTANCE = 3.0; // This is the speed to override the
@@ -28,62 +28,92 @@ public final class Constants {
 																				// pathfinding to not skip a step
 	public final static double AUTO_ROBOT_DEFAULT_SPEED = 0.45;
 
+	public final static double ELEVATOR_TOP_HEIGHT = 20.0; // in inches
+	
+	//Times
+	public final static long AUTO_OUTTAKE_TIME = 1000;// in ms
+	public final static long SWITCH_HEIGHT_TIMEOUT = 3000; // in ms
+	public final static long SCALE_HEIGHT_TIMEOUT = 4000; // in ms
+
 	/*
 	 * TALONS
 	 */
-	public final static int TALON_UNUSED = 200;
-	public final static int TALON_FRONT_LEFT_ID;
-	public final static boolean TALON_FRONT_LEFT_INVERTED;
+	public final static int TALON_FRONT_LEFT_ID = 1;
+	public final static boolean TALON_FRONT_LEFT_INVERTED = true;
 
-	public final static int TALON_MIDDLE_LEFT_ID;
-	public final static boolean TALON_MIDDLE_LEFT_INVERTED;
+	public final static int TALON_MIDDLE_LEFT_ID = 2;
+	public final static boolean TALON_MIDDLE_LEFT_INVERTED = true;
 
-	public final static int TALON_BACK_LEFT_ID;
-	public final static boolean TALON_BACK_LEFT_INVERTED;
+	public final static int TALON_BACK_LEFT_ID = 3;
+	public final static boolean TALON_BACK_LEFT_INVERTED = true;
 
-	public final static int TALON_FRONT_RIGHT_ID;
-	public final static boolean TALON_FRONT_RIGHT_INVERTED;
+	public final static int TALON_FRONT_RIGHT_ID = 4;
+	public final static boolean TALON_FRONT_RIGHT_INVERTED = false;
 
-	public final static int TALON_MIDDLE_RIGHT_ID;
-	public final static boolean TALON_MIDDLE_RIGHT_INVERTED;
+	public final static int TALON_MIDDLE_RIGHT_ID = 5;
+	public final static boolean TALON_MIDDLE_RIGHT_INVERTED = false;
 
-	public final static int TALON_BACK_RIGHT_ID;
-	public final static boolean TALON_BACK_RIGHT_INVERTED;
+	public final static int TALON_BACK_RIGHT_ID = 6;
+	public final static boolean TALON_BACK_RIGHT_INVERTED = false;
 
-	public final static int TALON_INTAKE_LEFT_ID;
-	public final static boolean TALON_INTAKE_LEFT_INVERTED;
+	public final static int TALON_INTAKE_ID = 7;
+	public final static boolean TALON_INTAKE_INVERTED = true;
+	
+	public final static int TALON_INTAKE_TILT_ID = 8;
+	public final static boolean TALON_INTAKE_TILT_INVERTED = true;
 
-	public final static int TALON_INTAKE_RIGHT_ID;
-	public final static boolean TALON_INTAKE_RIGHT_INVERTED;
+	public final static int TALON_ELEVATOR_LEFT_ID = 14;
+	public final static boolean TALON_ELEVATOR_LEFT_INVERTED = false;
 
-	public final static int TALON_INTAKE_UP_FRONT_LEFT_ID;
-	public final static boolean TALON_INTAKE_UP_FRONT_LEFT_INVERTED;
+	public final static int TALON_ELEVATOR_RIGHT_ID = 15;
+	public final static boolean TALON_ELEVATOR_RIGHT_INVERTED = false;
 
-	public final static int TALON_INTAKE_UP_FRONT_RIGHT_ID;
-	public final static boolean TALON_INTAKE_UP_FRONT_RIGHT_INVERTED;
+	// SPEEDS
+	public final static double ELEVATOR_SPEED_MULTIPLIER = 0.025;
+	public final static double ELEVATOR_SPEED_CONSTANT = 0.085;
+	public final static double ELEVATOR_STOPPED_SPEED = 0.0883;
+	public final static double INTAKE_TILT_SPEED = 1.0;
+	public final static double INTAKE_SPEED = 1.0;
+	public final static double OUTTAKE_SPEED = -INTAKE_SPEED;
+	public final static double INTAKE_STOPPED_SPEED = 0.12;
+	public final static double ELEVATOR_DOWN_SPEED = -0.125;
+	// HALLFX
+	public final static int HALLFX_PORT = 0;
+	public final static boolean HALLFX_INVERTED = false;
+	public final static int HALLFX_UP_POS = 45;
+	public final static int HALLFX_AUTON_POS = 84;
+	public final static int HALLFX_DOWN_POS = 0;
+	public final static double RESET_AMPERAGE = 9.0;
+	public final static double MAX_AMPERAGE = 11.0;
+	public final static int HALLFX_POS_EPSILON = 2;
+	
+	// LIDAR
+	public final static int LIDAR_PORT = 0;
+	public final static double LIDAR_CUBE_AMPS = 20.0;
+	public final static double LIDAR_HEIGHT_EPSILON = 2;// the epsilon is the percentage that the wanted distance
+															// and lidar distance have to equal in order for the
+	//HEIGHTS													// elevator to stop
+	public final static int HEIGHT_SWITCH = 40;
+	public final static int HEIGHT_SCALE = 75;
+	public final static int HEIGHT_SECOND_LAYER = 25;
+	public final static int HEIGHT_THIRD_LAYER = 39;
+	public final static int HEIGHT_CLIMB = 60;
+	public final static int HEIGHT_STEAL = 45;
+	public final static int HEIGHT_CUBE = 15;
+	
+	//ELEVATOR SAVER
+	public final static double SAVE_ELEVATOR_ANGLE = 10.0; // Degrees
+	
+	// CONTROLS
+	public final static int DRIVER_PORT = 0;
+	public final static double DRIVER_DEADZONE = 0.1;
+	public final static int OPERATOR_PORT = 1;
+	public final static double OPERATOR_DEADZONE = 0.1;
 
-	public final static int TALON_INTAKE_UP_BACK_RIGHT_ID;
-	public final static boolean TALON_INTAKE_UP_BACK_RIGHT_INVERTED;
+	// ENCODERS
 
-	public final static int TALON_INTAKE_UP_BACK_LEFT_ID;
-	public final static boolean TALON_INTAKE_UP_BACK_LEFT_INVERTED;
-
-	/*
-	 * ENCODERS
-	 */
 	// Physical properties
 	public final static double ROBOT_WHEEL_DIAMETER = 6.0; // WHEEL DIAMETER IN INCHES
-
-	// Left side
-	/*
-	 * public final static int ENCODER_LEFT_DRIVE_CHANNEL_1 = 0; public final static
-	 * int ENCODER_LEFT_DRIVE_CHANNEL_2 = 1; public final static boolean
-	 * ENCODER_LEFT_DRIVE_INVERTED;
-	 * 
-	 * //Right side public final static int ENCODER_RIGHT_DRIVE_CHANNEL_1 = 2;
-	 * public final static int ENCODER_RIGHT_DRIVE_CHANNEL_2 = 3; public final
-	 * static boolean ENCODER_RIGHT_DRIVE_INVERTED;
-	 */
 
 	// Calcs
 	public final static int ENCODER_STEPS_PER_FULL_ROTATION = 4096;
@@ -91,55 +121,17 @@ public final class Constants {
 	public final static double ENCODER_DISTANCE_PER_PULSE = (ROBOT_WHEEL_DIAMETER * Math.PI)
 			/ ENCODER_STEPS_PER_FULL_ROTATION;
 
-
-	// Intake
-	public final static int ENCODER_AUTONOMOUS_START_POSITION = 3750;
-	public final static int ENCODER_INTAKE_UP_POSITION = 3680;//3550
-	public final static int ENCODER_INTAKE_SWITCH_POSITION = 3225; //2800; then 2500;
-	public final static int ENCODER_INTAKE_SAFE_SHOOT_POSITION = 2000;
-
-	/*
-	 * PID
-	 */
-	/*
-	 * //Driving public final static double DRIVE_HEADING_P = 0.015; public final
-	 * static double DRIVE_HEADING_I = 0.0022; public final static double
-	 * DRIVE_HEADING_D = 0.00031; public final static double DRIVE_HEADING_MIN_MAX =
-	 * 0.1;
-	 * 
-	 * //Distance public final static double DRIVE_DISTANCE_P = 0.015; public final
-	 * static double DRIVE_DISTANCE_I = 0.0022; public final static double
-	 * DRIVE_DISTANCE_D = 0.00031;
-	 * 
-	 * //Turning public final static double TURN_P = 0.003;//0.14 public final
-	 * static double TURN_I = 0.000008; public final static double TURN_D =
-	 * 0.000003; public final static double TURN_MIN_VALUE = 0.1; public final
-	 * static double TURN_PRECISION = 1.0; //Make sure the turn is within the degree
-	 * 
-	 * //Vision public final static double VISION_P = 0.006; public final static
-	 * double VISION_I = 0.000125; //0.00000007; public final static double VISION_D
-	 * = 0.0075; //0.0005; public final static double VISION_MIN_MAX = 0.5;
-	 * 
-	 * public final static double PIVOT_DISTANCE_SCALING = 0.11;
-	 */
 	// Driving
-	/*
-	 * public final static double DRIVE_HEADING_P = 0.018; public final static
-	 * double DRIVE_HEADING_I = 0.00; public final static double DRIVE_HEADING_D =
-	 * 0.08; public final static double DRIVE_HEADING_MIN_MAX = 0.1;
-	 */
-
-	// Driving
-	public final static double DRIVE_HEADING_P = 0.036;//0.018;
+	public final static double DRIVE_HEADING_P = 0.036;// 0.018;
 	public final static double DRIVE_HEADING_I = 0.00;
 	public final static double DRIVE_HEADING_D = 0.085;
 	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
 
 	// Mimic
-	public final static double DRIVE_MIMIC_P = 0.025;
+	public final static double DRIVE_MIMIC_P = 0.016; //0.025
 	public final static double DRIVE_MIMIC_I = 0.00;
-	public final static double DRIVE_MIMIC_D = 0.065;
-	public final static double DRIVE_MIMIC_MIN_MAX = 0.4;
+	public final static double DRIVE_MIMIC_D = 0.060;
+	public final static double DRIVE_MIMIC_MIN_MAX = 0.35; //0.4
 
 	// Distance
 	public final static double DRIVE_DISTANCE_P = 0.00632;
@@ -163,9 +155,9 @@ public final class Constants {
 	public final static double PIVOT_DISTANCE_SCALING = 0.11;
 
 	public static class Vision {
-		public final static int IMAGE_WIDTH = 320;
-		public final static int IMAGE_HEIGHT = 240;
-		public final static int FPS = 10;
+		public final static int IMAGE_WIDTH = 240;
+		public final static int IMAGE_HEIGHT = 180;
+		public final static int FPS = 20;
 		public final static double CAMERA_HORZ_FOV;
 		public final static double CAMERA_VERT_FOV;
 		public final static double CAMERA_DIAG_DIST;
@@ -206,49 +198,4 @@ public final class Constants {
 			return angleFromCenter(fromCenter(pixel, IMAGE_HEIGHT), DEGREES_PER_VERT_PIXEL) + CAMERA_VERT_OFFSET;
 		}
 	}
-
-	static {
-			TALON_FRONT_LEFT_ID = 1;
-			TALON_FRONT_LEFT_INVERTED = true;
-
-			TALON_MIDDLE_LEFT_ID = 2;
-			TALON_MIDDLE_LEFT_INVERTED = true;
-
-			TALON_BACK_LEFT_ID = 3;
-			TALON_BACK_LEFT_INVERTED = true;
-
-			TALON_FRONT_RIGHT_ID = 4;
-			TALON_FRONT_RIGHT_INVERTED = false;
-
-			TALON_MIDDLE_RIGHT_ID = 5;
-			TALON_MIDDLE_RIGHT_INVERTED = false;
-
-			TALON_BACK_RIGHT_ID = 6;
-			TALON_BACK_RIGHT_INVERTED = false;
-
-			TALON_INTAKE_LEFT_ID = 7;
-			TALON_INTAKE_LEFT_INVERTED = false;
-
-			TALON_INTAKE_RIGHT_ID = 8;
-			TALON_INTAKE_RIGHT_INVERTED = false;
-
-			TALON_INTAKE_UP_FRONT_LEFT_ID = 10;
-			TALON_INTAKE_UP_FRONT_LEFT_INVERTED = true;
-
-			TALON_INTAKE_UP_FRONT_RIGHT_ID = 11;
-			TALON_INTAKE_UP_FRONT_RIGHT_INVERTED = false;
-
-			TALON_INTAKE_UP_BACK_RIGHT_ID = 14;
-			TALON_INTAKE_UP_BACK_RIGHT_INVERTED = false;
-
-			TALON_INTAKE_UP_BACK_LEFT_ID = 15;
-			TALON_INTAKE_UP_BACK_LEFT_INVERTED = true;
-	}
-
-	// SPEEDS
-	public final static double CLIMBER_SPEED = 1.0;
-	public final static double SCISSOR_UPPER_SPEED = 0.5;
-	public final static double SCISSOR_LOWER_SPEED = 0.1;
-	public final static double SCISSOR_REVERSE_SPEED = -0.1;
-	public final static double CATAPULT_LOWER_SPEED = 0.5;
 }

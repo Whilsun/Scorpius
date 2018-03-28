@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Vision {
 	public static CubeDetector cubeDetector;
-	public static UsbCamera camera;
+	public static UsbCamera camera, cameraTwo;
 	public static CvSink cv;
 	//public static CvSource proc;
 	public static Mat image;
@@ -43,6 +43,8 @@ public class Vision {
 		
 		camera.setResolution(Constants.Vision.IMAGE_WIDTH, Constants.Vision.IMAGE_HEIGHT);
 		camera.setFPS(Constants.Vision.FPS);
+		cameraTwo.setResolution(Constants.Vision.IMAGE_WIDTH, Constants.Vision.IMAGE_HEIGHT);
+		cameraTwo.setFPS(Constants.Vision.FPS);
 		cv = CameraServer.getInstance().getVideo();
 		CameraServer.getInstance().addServer("source", 1180).setSource(camera);
 		/*
@@ -56,8 +58,12 @@ public class Vision {
 		initialized = true;
 	}
 	
-	public final static void setCamera(UsbCamera c) {
+	public final static void setCubeCamera(UsbCamera c) {
 		camera = c;
+	}
+	
+	public final static void setFieldCamera(UsbCamera c) {
+		cameraTwo = c;
 	}
 	
 	public final static void setCameraNormal() {
@@ -65,12 +71,7 @@ public class Vision {
 		camera.setExposureManual(30);
 	}
 	
-	public final static void setCameraPeg() {
-		camera.setBrightness(0);
-		camera.setExposureManual(0);
-	}
-	
-	public final static void setCameraGear() {
+	public final static void setCameraCube() {
 		camera.setBrightness(10);
 		camera.setExposureManual(25);
 	}
@@ -130,119 +131,7 @@ public class Vision {
     	SmartDashboard.putBoolean("FoundCube", visionTargetFound);
     }
     
-    /*
-    public static void processGearFrame() {
-    	cv.grabFrame(image);
-    	if(image != null)
-    	{
-    		if(!image.empty()) {
-    			gripGear.process(image);
-    			List<MatOfPoint> contourPoints = gripGear.filterContoursOutput();
-    			
-    			if(contourPoints.size() == 0) {
-    				visionTargetFound = false;
-    				return;
-    			}
-    			
-    			MatOfPoint largestMat = contourPoints.get(0);
-    			for(MatOfPoint object : contourPoints) {
-    				if(getArea(object) > getArea(largestMat)) {
-    					largestMat = object;
-    				}
-    			}
-    			
-    			Rect gearRect = getRectangle(largestMat);
-    			double centerX = getCenterX(gearRect);
-    			double fromCenter = Constants.Vision.fromCenter(centerX);
-    			visionAngle = Constants.Vision.angleFromCenter(fromCenter);
-    			visionDistance = getCenterY(gearRect);
-    			visionTargetFound = true;
-    		} else {
-    			visionTargetFound = false;
-    		}
-    	} else {
-    		visionTargetFound = false;
-    	}
-    	
-		SmartDashboard.putBoolean("FoundGear", visionTargetFound);
-    }
-    
-    public static void processPegFrame() {
-    	cv.grabFrame(image);
-    	if(image != null)
-    	{
-    		if(!image.empty()) {
-    			grip.process(image);
-    			List<MatOfPoint> contourPoints = grip.filterContoursOutput();
-    			
-    			Rect leftPeg = new Rect(), rightPeg = new Rect();
-    			double centerX = 666;
-    			
-    			if(contourPoints.size() < 2) {
-    				SmartDashboard.putBoolean("ContoursFound", false);
-    				visionTargetFound = false;
-    				return;
-    			}
-    			
-    			SmartDashboard.putBoolean("ContoursFound", true);
-    			
-    			for(MatOfPoint parent : contourPoints) {
-    				Rect parentBox = getRectangle(parent);
-    				double parentX = getCenterX(parentBox);
-    				double parentY = getCenterY(parentBox);
-    				
-    				for(MatOfPoint child : contourPoints) {
-    					Rect childBox = getRectangle(child);
-    					if(inSameSpot(parentBox, childBox)) continue;
-    					double childX = getCenterX(childBox);
-    					double childY = getCenterY(childBox);
-    					
-    					if(Math.abs(parentY - childY) < 10) {
-    						SmartDashboard.putBoolean("PegFound", true);
-    						centerX = (parentX + childX) / 2;
-    						if(parentX < childX) {
-    							leftPeg = parentBox;
-    							rightPeg = childBox;
-    						} else {
-    							leftPeg = childBox;
-    							rightPeg = parentBox;
-    						}
-    						visionTargetFound = true;
-    						break;
-    					} else {
-    						SmartDashboard.putBoolean("PegFound", false);
-    					}
-    				}
-    			}
-    			
-    			double fromCenter = Constants.Vision.fromCenter(centerX);
-    			visionAngle = Constants.Vision.angleFromCenter(fromCenter);
-    			visionDistance = Math.abs(getCenterX(leftPeg) - getCenterX(rightPeg));
-    			
-    	    	SmartDashboard.putNumber("PegPairCenterX", fromCenter);
-    	    	SmartDashboard.putNumber("PegHorzAngle", visionAngle);
-    	    	SmartDashboard.putNumber("PegDisplacement", visionDistance);
-    		} else {
-    	    	visionTargetFound = false;
-    	    }
-    	} else {
-    		visionTargetFound = false;
-    	}
-    }
-    
-    public static void useAngleFromCamera() {
-    	DriveBasePIDSource.inputType = DriveBasePIDSource.InputType.Vision;
-    }
-    
-    public static void useAngleFromNavx() {
-    	DriveBasePIDSource.inputType = DriveBasePIDSource.InputType.Navx;
-    }*/
-    
-    public final static boolean isOnTarget() {
-    	return visionDistance > 40; //48
-    }
-    
-    public final static boolean foundTarget() {
+    public final static boolean hasTarget() {
     	return visionTargetFound;
     }
     
@@ -262,14 +151,6 @@ public class Vision {
     	targetting = TargetMode.Normal;
     }
     
-    /*
-    public static void stopAllVision() {
-    	DriveBase.disablePID();
-    	DriveBase.setPIDNormal();
-    	Vision.useAngleFromNavx();
-    	Vision.setNormalTargetMode();
-    }*/
-    
     public final static void periodic() {
     	switch(targetting) {
     	case Normal:
@@ -280,6 +161,7 @@ public class Vision {
     		processCubeFrame();
     	}
     	
+    	//Publish to the other camera server
     	/*if(image != null) {
     		if(!image.empty()) proc.putFrame(image);
     	}*/

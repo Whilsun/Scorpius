@@ -7,28 +7,20 @@
 
 package org.usfirst.frc.team5431.robot;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
-import org.usfirst.frc.team5431.robot.Titan.AssignableJoystick;
 import org.usfirst.frc.team5431.robot.Titan.CommandQueue;
-import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
-import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
-import org.usfirst.frc.team5431.robot.auton.BuildAutonomousCommand;
-import org.usfirst.frc.team5431.robot.auton.CalibrateCommand;
-import org.usfirst.frc.team5431.robot.auton.DriveCommand;
-import org.usfirst.frc.team5431.robot.auton.MimicCommad;
-import org.usfirst.frc.team5431.robot.auton.MimicCommad.Paths;
-import org.usfirst.frc.team5431.robot.auton.TurnCommand;
-import org.usfirst.frc.team5431.robot.auton.WaitCommand;
-import org.usfirst.frc.team5431.robot.components.Climber;
+import org.usfirst.frc.team5431.robot.commands.BuildAutonomousCommand;
+import org.usfirst.frc.team5431.robot.commands.CalibrateCommand;
+import org.usfirst.frc.team5431.robot.commands.WaitCommand;
+import org.usfirst.frc.team5431.robot.commands.MimicCommand;
+import org.usfirst.frc.team5431.robot.commands.MimicCommand.Paths;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
 import org.usfirst.frc.team5431.robot.components.Elevator;
+import org.usfirst.frc.team5431.robot.components.Intake;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,25 +28,33 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 
 	private final DriveBase driveBase = new DriveBase();
-	private final Climber climber = new Climber();
 	private final Teleop teleop = new Teleop();
-	private final Elevator intake = new Elevator();
+	private final Elevator elevator = new Elevator();
+	private final Intake intake = new Intake();
 
 	public enum AutonPriority {
 		AUTO_LINE, SWITCH, SCALE, SWITCH_SCALE
 	}
 
 	public enum AutonPosition {
-		CENTER, RIGHT
+		LEFT, CENTER, RIGHT;
+
+		public static AutonPosition valueOf(final Titan.GameData.Position pos) {
+			if (pos == Titan.GameData.Position.LEFT) {
+				return AutonPosition.LEFT;
+			} else {
+				return AutonPosition.RIGHT;
+			}
+		}
 	}
 
 	private enum PIDTest {
 		HEADING, TURNING, NONE
 	}
 
-	//Auto steps
+	// Auto steps
 	private final Titan.CommandQueue<Robot> aSteps = new Titan.CommandQueue<>();
-	
+
 	private final Titan.GameData game = new Titan.GameData();
 	private final SendableChooser<AutonPriority> autonChooser = new SendableChooser<AutonPriority>();
 	private final SendableChooser<PIDTest> pidChooser = new SendableChooser<PIDTest>();
@@ -66,9 +66,10 @@ public class Robot extends IterativeRobot {
 		// Set the debugging flag
 		Titan.DEBUG = Constants.ENABLE_DEBUGGING;
 
-		// Vision.setCamera(CameraServer.getInstance().startAutomaticCapture());
-		// Vision.init();
-		// CubeFinder.start();
+		// Start the vision class
+		Vision.setCubeCamera(CameraServer.getInstance().startAutomaticCapture("CubeCamera", 0));
+		Vision.setFieldCamera(CameraServer.getInstance().startAutomaticCapture("FieldCamera", 1));
+		Vision.init();
 
 		// Used for the autonomous selection
 		autonChooser.addDefault("Auto Line", AutonPriority.AUTO_LINE);
@@ -106,6 +107,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("I", Constants.TURN_I);
 		SmartDashboard.putNumber("D", Constants.TURN_D);
 		SmartDashboard.putData("Gyro", driveBase.getNavx());
+		SmartDashboard.putString("MimicFile", "TEST_MIMIC_FILE");
 	}
 
 	@Override
@@ -120,23 +122,27 @@ public class Robot extends IterativeRobot {
 		driveBase.setHome();
 
 		// Add the wait selector to the smart dashboard
+		aSteps.clear(); //Clear all previous commands
 		if (waitMillis != 0)
 			aSteps.add(new WaitCommand(waitMillis));
 		aSteps.add(new CalibrateCommand());
-		aSteps.add(new BuildAutonomousCommand(priority, position));
+		/*aSteps.add(new BuildAutonomousCommand(priority, position));*/
+		aSteps.add(new MimicCommand(Paths.valueOf(SmartDashboard.getString("MimicFile", "TEST_MIMIC_FILE"))));
 
 		// Test the mimic code
-		//aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
+		// aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
 		aSteps.init(this);
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		if (!aSteps.periodic(this)){
+		// As soon as queue is finsihed, stop drivebase
+		if (!aSteps.update(this)) {
 			driveBase.drive(0.0, 0.0);
 		}
-		
-		//Update the intake and climber
+
+		// Update the intake and climber
+		elevator.update(this);
 		intake.update(this);
 	}
 
@@ -144,14 +150,16 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
-		// intake.tryToZero(this);
 	}
 
 	@Override
 	public void teleopPeriodic() {
+		teleop.periodicElevator(this);
 		teleop.periodicIntake(this);
 		teleop.periodicDrive(this);
-		//teleop.periodicClimb(this);
+		
+		//Save the elevator when it tips
+		elevator.saveElevator(this);
 	}
 
 	@Override
@@ -162,10 +170,13 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void testInit() {
 		Titan.l("Starting test mode!");
+		driveBase.setHome();
 		driveBase.setBrakeMode(true);
+		intake.setHomeUp();
 
 		if (Constants.AUTO_LOG_PATHFINDING) {
-			Mimic.Observer.prepare(Constants.AUTO_LOG_PATHFINDING_NAME);
+			Mimic.Observer.prepare(SmartDashboard.getString("MimicFile", Constants.AUTO_LOG_PATHFINDING_NAME));
+					//Constants.AUTO_LOG_PATHFINDING_NAME);
 		}
 		/*
 		 * PIDTest testPID = pidChooser.getSelected(); double speed =
@@ -185,15 +196,15 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		SmartDashboard.putNumber("LeftEncoder", driveBase.getLeftDistance());
 		SmartDashboard.putNumber("RightEncoder", driveBase.getRightDistance());
-
+		teleop.periodicElevator(this);
+		teleop.periodicIntake(this);
+		
 		if (Constants.AUTO_LOG_PATHFINDING) {
 			final double vals[] = teleop.periodicPathfindingDrive(this);
 			Mimic.Observer.addStep(this, vals);
 		} else {
 			teleop.periodicDrive(this);
 		}
-		
-		intake.update(this);
 	}
 
 	public void disabledInit() {
@@ -216,11 +227,11 @@ public class Robot extends IterativeRobot {
 		return teleop;
 	}
 
-	public Climber getClimber() {
-		return climber;
+	public Elevator getElevator() {
+		return elevator;
 	}
 
-	public Elevator getIntake() {
+	public Intake getIntake() {
 		return intake;
 	}
 

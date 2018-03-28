@@ -6,107 +6,130 @@ import org.usfirst.frc.team5431.robot.Titan;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 public class Elevator {
-	private final WPI_TalonSRX intakeLeft, intakeRight, intakeUpFrontLeft, intakeUpBackLeft, intakeUpFrontRight, intakeUpBackRight;
-	private final DigitalInput intakeStop, cubeDetector;
+	public static enum ControlMode {
+		AUTO, MANUAL;
+	}
 
-	private final SpeedControllerGroup intake, intakeUp;
+	private final WPI_TalonSRX elevatorLeft, elevatorRight;
+
+	private final SpeedControllerGroup elevator;
 	private final Titan.Lidar lidar;
 	
-	private double wantedDistance = -1.0;
-	
+	private ControlMode mode = ControlMode.MANUAL;
+	private double wantedHeight = -1; // only affects AUTO mode
+	private double iRate = 0.35;
+	private double increaseRate = 0.025;
+
 	public Elevator() {
-		intakeLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_LEFT_ID);
-		intakeRight = new WPI_TalonSRX(Constants.TALON_INTAKE_RIGHT_ID);
-		intakeUpFrontLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_FRONT_LEFT_ID);
-		intakeUpFrontRight = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_FRONT_RIGHT_ID);
-		intakeUpBackLeft = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_BACK_LEFT_ID);
-		intakeUpBackRight = new WPI_TalonSRX(Constants.TALON_INTAKE_UP_BACK_RIGHT_ID);
+		elevatorLeft = new WPI_TalonSRX(Constants.TALON_ELEVATOR_LEFT_ID);
+		elevatorRight = new WPI_TalonSRX(Constants.TALON_ELEVATOR_RIGHT_ID);
 
 		// Setup the brake modes on the intake
-		intakeLeft.setNeutralMode(NeutralMode.Brake);
-		intakeRight.setNeutralMode(NeutralMode.Brake);
-		intakeUpFrontLeft.setNeutralMode(NeutralMode.Brake);
-		intakeUpFrontRight.setNeutralMode(NeutralMode.Brake);
-		intakeUpBackLeft.setNeutralMode(NeutralMode.Brake);
-		intakeUpBackRight.setNeutralMode(NeutralMode.Brake);
+		elevatorLeft.setNeutralMode(NeutralMode.Brake);
+		elevatorRight.setNeutralMode(NeutralMode.Brake);
 
 		// Set the intake's inversion options
-		intakeLeft.setInverted(Constants.TALON_INTAKE_LEFT_INVERTED);
-		intakeRight.setInverted(Constants.TALON_INTAKE_RIGHT_INVERTED);
-		intakeUpFrontLeft.setInverted(Constants.TALON_INTAKE_UP_FRONT_LEFT_INVERTED);
-		intakeUpFrontRight.setInverted(Constants.TALON_INTAKE_UP_FRONT_RIGHT_INVERTED);
-		intakeUpBackLeft.setInverted(Constants.TALON_INTAKE_UP_BACK_LEFT_INVERTED);
-		intakeUpBackRight.setInverted(Constants.TALON_INTAKE_UP_BACK_RIGHT_INVERTED);
+		
+		elevatorLeft.setInverted(Constants.TALON_ELEVATOR_LEFT_INVERTED);
+		elevatorRight.setInverted(Constants.TALON_ELEVATOR_RIGHT_INVERTED);
 
-		intake = new SpeedControllerGroup(intakeLeft, intakeRight);
-		intakeUp = new SpeedControllerGroup(intakeUpFrontLeft, intakeUpFrontRight, intakeUpBackLeft, intakeUpBackRight);
+		elevator = new SpeedControllerGroup(elevatorLeft, elevatorRight);
 
-		// intakeUpRight.set(0.0);
-
-		// intakeUpRight.set(ControlMode.PercentOutput, 0.0);
-
-		intakeStop = new DigitalInput(0);
-		cubeDetector = new DigitalInput(1);
-
-		lidar = new Titan.Lidar(0);
+		lidar = new Titan.Lidar(Constants.LIDAR_PORT);
 	}
 
-	public boolean hasCube() {
-		return !cubeDetector.get();
+	public void saveElevator(final Robot robot) {
+		final double pitch = Math.abs(robot.getDriveBase().getNavx().getPitch());
+		final double roll = Math.abs(robot.getDriveBase().getNavx().getRoll());
+		if((pitch > Constants.SAVE_ELEVATOR_ANGLE || roll > Constants.SAVE_ELEVATOR_ANGLE) && !isAtBottom()) {
+			Titan.e("SAVING THE ELEVATOR! THE CURRENT ANGLES ARE PITCH: %.2f AND ROLL %.2f", pitch, roll);
+			robot.getElevator().goToBottom();
+		}
 	}
-
-	public boolean isDown() {
-		return !intakeStop.get();
-	}
-
+	
 	public double getUpPos() {
 		return lidar.getDistance();
 	}
 
 	public void setUpSpeed(final double speed) {
-		intakeUp.set(speed);
+		elevator.set(speed);
 	}
 
 	public void stopUp() {
-		setUpSpeed(0.0);
+		setUpSpeed(Constants.ELEVATOR_STOPPED_SPEED);
 	}
 
-	public void setIntakeSpeed(final double speed) {
-		intake.set(speed);
+	public void setWantedHeight(final double dis, final boolean override) {
+		if(override) {
+			iRate = 1.0;
+		} else {
+			iRate = 0.35;
+		}
+		
+		setMode(ControlMode.AUTO);
+		wantedHeight = dis;
+	}
+	
+	public void setWantedHeight(final double dis) {
+		setWantedHeight(dis, false);
 	}
 
-	public void stopIntake() {
-		setIntakeSpeed(0.08);
+	public ControlMode getMode() {
+		return mode;
+	}
+
+	public void setMode(ControlMode mode) {
+		this.mode = mode;
+	}
+
+	public void goToTop() {
+		setWantedHeight(Constants.ELEVATOR_TOP_HEIGHT);
+	}
+
+	public void goToBottom() {
+		setWantedHeight(Constants.HEIGHT_CUBE);
 	}
 	
-	public void setWantedDistance(final double dis) {
-		wantedDistance = dis;
+	public boolean isAtBottom() {
+		return Titan.approxEquals(lidar.getDistance(), Constants.HEIGHT_CUBE, Constants.LIDAR_HEIGHT_EPSILON);
 	}
-	
-	public void resetWantedDistance() {
-		wantedDistance = -1;
+
+	public void resetWantedHeight() {
+		wantedHeight = -1;
+	}
+
+	public boolean isAtWantedHeight() {
+		return Titan.approxEquals(lidar.getDistance(), wantedHeight, Constants.LIDAR_HEIGHT_EPSILON);
 	}
 
 	public void update(final Robot robot) {
-		SmartDashboard.putBoolean("IntakeDown", intakeStop.get());
-		SmartDashboard.putBoolean("HasCube", hasCube());
-		SmartDashboard.putNumber("UpPot", getUpPos());
-		SmartDashboard.putNumber("IntakeLeftVolts", intakeLeft.getMotorOutputVoltage());
-		
-		if(wantedDistance >= 0) {
-			final double distance = lidar.getDistance();
-			if(!Titan.approxEquals(distance, wantedDistance, 0.1)) {
-				if(wantedDistance > distance) {
-					setUpSpeed(0.5);
-				}else if(wantedDistance < distance) {
-					setUpSpeed(-0.5);
+		SmartDashboard.putNumber("ElevatorHeight", getUpPos());
+		SmartDashboard.putNumber("WantedDistance", wantedHeight);
+		SmartDashboard.putString("ControlMode", mode.name());
+
+		if (mode == ControlMode.AUTO) {
+			if (wantedHeight >= 0) {
+				final double distance = lidar.getDistance();
+				final double velocity = ((Math.abs(distance - wantedHeight) * Constants.ELEVATOR_SPEED_MULTIPLIER)
+						+ Constants.ELEVATOR_SPEED_CONSTANT) * iRate;
+
+				if(iRate < 1.0) {
+					iRate += increaseRate;
+				}
+				
+				if (isAtWantedHeight()) {
+					//resetWantedHeight();
+					//stopUp();
+				} else if (wantedHeight > distance) {
+					setUpSpeed(velocity);
+				} else if (wantedHeight < distance) {
+					setUpSpeed(Constants.ELEVATOR_DOWN_SPEED);
 				}
 			}
 		}

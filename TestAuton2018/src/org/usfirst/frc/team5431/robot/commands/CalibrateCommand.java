@@ -1,11 +1,11 @@
-package org.usfirst.frc.team5431.robot.auton;
+package org.usfirst.frc.team5431.robot.commands;
 
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 
 public class CalibrateCommand extends Titan.Command<Robot> {
 	public CalibrateCommand() {
-		name = "CalibrateStep";
+		name = "CalibrateCommand";
 		properties = "Intake and Gamedata calibration";
 	}
 
@@ -16,19 +16,22 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 		}
 		
 		if(robot.getGameData().hasData()) return CommandResult.COMPLETE;
-		robot.getDriveBase().drive(0.0, 0.0);
 		Titan.l("Calibrating... %d (Current game data: %s)", getElapsed(), robot.getGameData().getString());
 		return CommandResult.IN_PROGRESS;
 	}
 
 	@Override
 	public void init(final Robot robot) {
-		robot.getIntake().stopUp();
+		robot.getDriveBase().drive(0.0, 0.0);
+		robot.getElevator().stopUp();
+		robot.getIntake().stopIntake();
+		robot.getIntake().setHomeUp();
 	}
 
 	@Override
 	public void done(final Robot robot) {
 		robot.getDriveBase().setHome();
-		robot.getIntake().stopUp();
+		robot.getElevator().stopUp();
+		robot.getIntake().stopIntake();
 	}
 }

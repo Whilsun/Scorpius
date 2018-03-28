@@ -1,7 +1,8 @@
 package org.usfirst.frc.team5431.robot;
 
-import org.usfirst.frc.team5431.robot.Titan.Xbox.Button;
 import org.usfirst.frc.team5431.robot.components.Elevator;
+import org.usfirst.frc.team5431.robot.components.Intake;
+import org.usfirst.frc.team5431.robot.components.Elevator.ControlMode;
 
 public final class Teleop {
 	private final Titan.Xbox driver;
@@ -9,11 +10,11 @@ public final class Teleop {
 	private final Titan.Toggle cubeCaptureToggle = new Titan.Toggle();
 
 	public Teleop() {
-		driver = new Titan.Xbox(0);
-		driver.setDeadzone(0.1);
+		driver = new Titan.Xbox(Constants.DRIVER_PORT);
+		driver.setDeadzone(Constants.DRIVER_DEADZONE);
 
-		operator = new Titan.LogitechExtreme3D(1);
-		operator.setDeadzone(0.1);
+		operator = new Titan.LogitechExtreme3D(Constants.OPERATOR_PORT);
+		operator.setDeadzone(Constants.OPERATOR_DEADZONE);
 	}
 
 	public final void periodicDrive(final Robot robot) {
@@ -27,48 +28,77 @@ public final class Teleop {
 		robot.getDriveBase().drive(vals[0], vals[1]);
 		return vals;
 	}
-
-	public final void periodicClimb(final Robot robot) {
-		if (driver.getRawButton(Button.B)) {
-			robot.getClimber().climb();
-		} else {
-			robot.getClimber().stopClimbing();
-		}
-
-		if (driver.getRawButton(Button.Y)) {
-			robot.getClimber().scissorUpFast();
-		} else if (driver.getRawButton(Button.X)) {
-			robot.getClimber().scissorUpSlow();
-		} else if (driver.getRawButton(Button.A)) {
-			robot.getClimber().scissorDown();
-		} else {
-			robot.getClimber().stopScissor();
-		}
-	}
-
+	
 	public final void periodicIntake(final Robot robot) {
-		final Elevator intake = robot.getIntake();
-
-		intake.setUpSpeed(operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y));
-
+		final Intake intake = robot.getIntake();
+		if(operator.getPOV() == 0) { //operator.getRawButton(Titan.LogitechExtreme3D.Button.SIX)) {
+			intake.setMode(Intake.ControlMode.MANUAL);
+			intake.setTiltSpeed(Constants.INTAKE_TILT_SPEED);
+		} else if(operator.getPOV() == 180) { //operator.getRawButton(Titan.LogitechExtreme3D.Button.FOUR)) {
+			intake.setMode(Intake.ControlMode.MANUAL);
+			intake.setTiltSpeed(-Constants.INTAKE_TILT_SPEED);
+		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.SIX)) {
+			intake.goToTop();
+		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.FOUR)) {
+			intake.goToBottom();
+		} else {
+			intake.stopTilting();
+		}
+		
 		if (cubeCaptureToggle.isToggled(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWO))) {
 			if(intake.hasCube()){
 				cubeCaptureToggle.setState(false);
-			}else {
-				intake.setIntakeSpeed(1.0);	
+				intake.goToTop();
+			} else {
+				intake.intake();	
 			}
 		} else if (operator.getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
-			intake.setIntakeSpeed(-1.0);
+			intake.outtake();
 		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.THREE)){
-			intake.setIntakeSpeed(1.0);
+			intake.intake();
 		}else {
 			intake.stopIntake();
 		}
-
+		
 		intake.update(robot);
+	}
+
+	public final void periodicElevator(final Robot robot) {
+		final Elevator elevator = robot.getElevator();
+
+		final double upSpeed = operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y);
+		if(elevator.getMode() == ControlMode.MANUAL || Math.abs(upSpeed) > Constants.OPERATOR_DEADZONE) {
+			elevator.setMode(ControlMode.MANUAL);
+			elevator.setUpSpeed(upSpeed * operator.getRawAxis(Titan.LogitechExtreme3D.Axis.SLIDER));
+		}
+		
+		if(operator.getRawButton(Titan.LogitechExtreme3D.Button.ELEVEN)) {
+			elevator.setWantedHeight(Constants.HEIGHT_STEAL);
+		}
+		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.NINE)) {
+			elevator.setWantedHeight(Constants.HEIGHT_SWITCH);
+		}
+		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.SEVEN)) {
+			elevator.setWantedHeight(Constants.HEIGHT_SCALE);
+		}
+		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWELVE)) {
+			elevator.goToBottom();
+		}
+		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TEN)) {
+			elevator.setWantedHeight(Constants.HEIGHT_SECOND_LAYER);
+		}
+		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.EIGHT)) {
+			elevator.setWantedHeight(Constants.HEIGHT_THIRD_LAYER);
+		}
+		
+		elevator.update(robot);
 	}
 
 	public Titan.Xbox getXbox() {
 		return driver;
+	}
+	
+	public Titan.LogitechExtreme3D getLogitech() {
+		return operator;
 	}
 }

@@ -1,4 +1,4 @@
-package org.usfirst.frc.team5431.robot.auton;
+package org.usfirst.frc.team5431.robot.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class TurnCommand extends Titan.Command<Robot> {
 	
 	public TurnCommand(final double deg) { // TODO MAKE THE TURNING MORE SMOOTH BY OVERRIDING THE NAVX ANGLE WITH THE CURRENT MAXIMUM CHUNK! BECAUSE THE BOT SLOWS DOWN AND STOPS...
 		degrees = deg;
-		name = "TurnStep";
+		name = "TurnCommand";
 		properties = String.format("Angle %.2f", degrees);
 		
 		while(degrees > degreeChunkSize) {
