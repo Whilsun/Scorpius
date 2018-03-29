@@ -6,11 +6,11 @@ import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
-import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
-import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
-public class MimicCommand extends Titan.Command<Robot> {
+public class MimickCommand extends Titan.Command<Robot> {
 	public static enum Paths {
 		TEST_MIMIC_FILE, CENTER_LEFT_SWITCH, CENTER_RIGHT_SWITCH, LEFT_LEFT_SWITCH, RIGHT_RIGHT_SWITCH, LEFT_RIGHT_SWITCH, RIGHT_RIGHT_SCALE, RIGHT_TWO_CUBE_SWITCH
 	}
@@ -25,6 +25,7 @@ public class MimicCommand extends Titan.Command<Robot> {
 	private double futureLeftIntegral = 1.0;
 	private double futureRightIntegral = 1.0;
 	private final ArrayList<Stepper> steps;
+	private Mimick
 	
 	public MimicCommand(final Paths mimic) {
 		name = "MimicCommand";
