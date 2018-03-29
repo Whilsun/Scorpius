@@ -7,6 +7,7 @@ import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimick;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick.MimickException;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimick.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
@@ -25,14 +26,22 @@ public class MimickCommand extends Titan.Command<Robot> {
 	private double futureLeftIntegral = 1.0;
 	private double futureRightIntegral = 1.0;
 	private final ArrayList<Stepper> steps;
-	private Mimick
+	private Mimick.Repeater repeater;
+
+	//Mimic file paths
+	public static final String mimicPath = "/media/sda1/%s.mimic";
 	
-	public MimicCommand(final Paths mimic) {
+	public MimickCommand(final Paths mimic) {
 		name = "MimicCommand";
 		
 		//Collect the mimic file
-		Mimic.Repeater.prepare(mimic.toString().toLowerCase());
-		steps = Mimic.Repeater.getData();
+		repeater = new Mimick.Repeater(String.format(mimicPath, mimic.toString()));
+		try {
+			repeater.prepare();
+		} catch(MimickException err) {
+			Titan.ee("MimicCommand", err);
+		}
+		steps = repeater.getData();
 		properties = String.format("Steps %d", steps.size());
 	}
 	
@@ -43,8 +52,8 @@ public class MimickCommand extends Titan.Command<Robot> {
 		double angle = 0.0;
 		try {
 			final Stepper step = steps.get(0);
-			power = (step.leftPower + step.rightPower) / 2.0;
-			angle = step.angle;
+			power = (step.get("left_power") + step.get("right_power")) / 2.0;
+			angle = step.get("yaw");
 		} catch (Throwable ignored) {}
 		robot.getDriveBase().driveAtAnglePID(power, angle, TitanPIDSource.NAVX_MIMIC, Vision.TargetMode.Normal);
 	}
@@ -54,20 +63,20 @@ public class MimickCommand extends Titan.Command<Robot> {
 		boolean nextStep = true;
 		try {
 			final Stepper step = steps.get(currentStep);
-			if(step.isHome) {
+			if(step.is("home")) {
 				robot.getDriveBase().reset(); //Do not call setHome because that disables PID
 			} else {
-				final double power = (step.leftPower + step.rightPower) / 2.0;
+				final double power = (step.get("left_power") + step.get("right_power")) / 2.0;
 				
-				robot.getDriveBase().updateStepResults(power, step.angle);
-				if(!robot.getDriveBase().hasTravelled(step.leftDistance) && !(Math.abs(power) < Constants.AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED)) {
+				robot.getDriveBase().updateStepResults(power, step.get("yaw"));
+				if(!robot.getDriveBase().hasTravelled(step.get("left_encoder")) && !(Math.abs(power) < Constants.AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED)) {
 					Titan.l("Mimic is falling behind!");
 					nextStep = false;
 				}
 			}
-			robot.getElevator().setWantedHeight(step.elevatorHeight, true); //MIMIC OVERRIDE
-			robot.getIntake().setWantedTilt(step.intakeTilt);
-			robot.getIntake().setIntakeSpeed(step.intakeSpeed);
+			robot.getElevator().setWantedHeight(step.get("elevator_height"), true); //MIMIC OVERRIDE
+			robot.getIntake().setWantedTilt(step.get("intake_tilt"));
+			robot.getIntake().setIntakeSpeed(step.get("intake_speed"));
 		} catch (IndexOutOfBoundsException e) {}
 		if(nextStep || skippedSteps > 5) {
 			if(((currentStep++) + 1) > steps.size()) return CommandResult.COMPLETE;

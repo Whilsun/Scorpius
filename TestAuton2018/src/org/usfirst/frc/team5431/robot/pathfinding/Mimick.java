@@ -225,7 +225,7 @@ public class Mimick {
 				log.close();
 				saved = true;
 			} catch (IOException e) {
-				throw new MimickException("Failed to save mimic file! " + e.getMessage());
+				throw new MimickException("Failed to save mimick file! " + e.getMessage());
 			}
 		}
 	}

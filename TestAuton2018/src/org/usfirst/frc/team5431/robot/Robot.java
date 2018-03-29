@@ -11,13 +11,15 @@ import org.usfirst.frc.team5431.robot.Titan.CommandQueue;
 import org.usfirst.frc.team5431.robot.commands.BuildAutonomousCommand;
 import org.usfirst.frc.team5431.robot.commands.CalibrateCommand;
 import org.usfirst.frc.team5431.robot.commands.WaitCommand;
-import org.usfirst.frc.team5431.robot.commands.MimicCommand;
-import org.usfirst.frc.team5431.robot.commands.MimicCommand.Paths;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick.MimickException;
+import org.usfirst.frc.team5431.robot.pathfinding.Mimick.Stepper;
+import org.usfirst.frc.team5431.robot.commands.MimickCommand;
+import org.usfirst.frc.team5431.robot.commands.MimickCommand.Paths;
 import org.usfirst.frc.team5431.robot.components.DriveBase;
 import org.usfirst.frc.team5431.robot.components.DriveBase.TitanPIDSource;
 import org.usfirst.frc.team5431.robot.components.Elevator;
 import org.usfirst.frc.team5431.robot.components.Intake;
-import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
 import edu.wpi.first.wpilibj.CameraServer;
@@ -31,6 +33,7 @@ public class Robot extends IterativeRobot {
 	private final Teleop teleop = new Teleop();
 	private final Elevator elevator = new Elevator();
 	private final Intake intake = new Intake();
+	private Mimick.Observer observer;
 
 	public enum AutonPriority {
 		AUTO_LINE, SWITCH, SCALE, SWITCH_SCALE
@@ -107,7 +110,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("I", Constants.TURN_I);
 		SmartDashboard.putNumber("D", Constants.TURN_D);
 		SmartDashboard.putData("Gyro", driveBase.getNavx());
-		SmartDashboard.putString("MimicFile", "TEST_MIMIC_FILE");
+		SmartDashboard.putString("MimickFile", "TEST_MIMIC_FILE");
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class Robot extends IterativeRobot {
 			aSteps.add(new WaitCommand(waitMillis));
 		aSteps.add(new CalibrateCommand());
 		/*aSteps.add(new BuildAutonomousCommand(priority, position));*/
-		aSteps.add(new MimicCommand(Paths.valueOf(SmartDashboard.getString("MimicFile", "TEST_MIMIC_FILE"))));
+		aSteps.add(new MimickCommand(Paths.valueOf(SmartDashboard.getString("MimickFile", "TEST_MIMIC_FILE"))));
 
 		// Test the mimic code
 		// aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
@@ -175,8 +178,13 @@ public class Robot extends IterativeRobot {
 		intake.setHomeUp();
 
 		if (Constants.AUTO_LOG_PATHFINDING) {
-			Mimic.Observer.prepare(SmartDashboard.getString("MimicFile", Constants.AUTO_LOG_PATHFINDING_NAME));
-					//Constants.AUTO_LOG_PATHFINDING_NAME);
+			observer = new Mimick.Observer(String.format(MimickCommand.mimicPath, SmartDashboard.getString("MimicFile", Constants.AUTO_LOG_PATHFINDING_NAME)));
+			observer.addArguments("left_encoder", "right_encoder", "yaw", "left_power", "right_power", "home", "elevator_height", "intake_tilt", "intake_speed");
+			try {
+				observer.prepare();
+			} catch(MimickException err) {
+				Titan.ee("MimickObserver", err);
+			}
 		}
 		/*
 		 * PIDTest testPID = pidChooser.getSelected(); double speed =
@@ -201,7 +209,37 @@ public class Robot extends IterativeRobot {
 		
 		if (Constants.AUTO_LOG_PATHFINDING) {
 			final double vals[] = teleop.periodicPathfindingDrive(this);
-			Mimic.Observer.addStep(this, vals);
+			try {
+				Stepper step = observer.createStep();
+				step.set("left_encoder", driveBase.getLeftDistance());
+				step.set("right_encoder", driveBase.getRightDistance());
+				step.set("yaw", driveBase.getNavx().getYaw());
+				step.set("left_power", vals[0]);
+				step.set("right_power", vals[1]);
+
+				boolean home = teleop.getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.FIVE);
+
+				step.set("home", home);
+				step.set("elevator_height", elevator.getUpPos());
+				
+				double intakeSpeed = Constants.INTAKE_STOPPED_SPEED;
+				if(teleop.getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
+					intakeSpeed = Constants.OUTTAKE_SPEED;
+				} else if(teleop.getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.THREE)) {
+					intakeSpeed = Constants.INTAKE_SPEED;
+				}
+				
+				step.set("intake_speed", intakeSpeed);
+				step.set("intake_tilt", intake.getTiltPosition());
+				
+				if(home) {
+					driveBase.setHome();
+				}
+				
+				observer.addStep(step);
+			} catch(MimickException err) {
+				Titan.ee("MimickObserver", err);
+			}
 		} else {
 			teleop.periodicDrive(this);
 		}
@@ -211,7 +249,11 @@ public class Robot extends IterativeRobot {
 		Vision.setNormalTargetMode();
 		driveBase.disableAllPID();
 		if (Constants.AUTO_LOG_PATHFINDING) {
-			Mimic.Observer.saveMimic();
+			try {
+				observer.save();
+			} catch(MimickException err) {
+				Titan.ee("MimickObserver", err);
+			}
 		}
 	}
 
