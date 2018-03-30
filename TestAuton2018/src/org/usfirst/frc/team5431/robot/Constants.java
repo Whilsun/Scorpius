@@ -70,12 +70,12 @@ public final class Constants {
 
 	// SPEEDS
 	public final static double ELEVATOR_SPEED_MULTIPLIER = 0.025;
-	public final static double ELEVATOR_SPEED_CONSTANT = 0.085;
+	public final static double ELEVATOR_SPEED_CONSTANT = 0.095;
 	public final static double ELEVATOR_STOPPED_SPEED = 0.0883;
 	public final static double INTAKE_TILT_SPEED = 1.0;
 	public final static double INTAKE_SPEED = 1.0;
 	public final static double OUTTAKE_SPEED = -INTAKE_SPEED;
-	public final static double INTAKE_STOPPED_SPEED = 0.12;
+	public final static double INTAKE_STOPPED_SPEED = 0.075; //0.12;
 	public final static double ELEVATOR_DOWN_SPEED = -0.125;
 	// HALLFX
 	public final static int HALLFX_PORT = 0;
@@ -94,12 +94,13 @@ public final class Constants {
 															// and lidar distance have to equal in order for the
 	//HEIGHTS													// elevator to stop
 	public final static int HEIGHT_SWITCH = 40;
-	public final static int HEIGHT_SCALE = 75;
+	public final static int HEIGHT_SCALE = 70;
 	public final static int HEIGHT_SECOND_LAYER = 25;
 	public final static int HEIGHT_THIRD_LAYER = 39;
 	public final static int HEIGHT_CLIMB = 60;
 	public final static int HEIGHT_STEAL = 45;
 	public final static int HEIGHT_CUBE = 15;
+	public final static double HEIGHT_LOWEST = 13;
 	
 	//ELEVATOR SAVER
 	public final static double SAVE_ELEVATOR_ANGLE = 10.0; // Degrees
@@ -128,10 +129,10 @@ public final class Constants {
 	public final static double DRIVE_HEADING_MIN_MAX = 0.1;
 
 	// Mimic
-	public final static double DRIVE_MIMIC_P = 0.016; //0.025
-	public final static double DRIVE_MIMIC_I = 0.00;
-	public final static double DRIVE_MIMIC_D = 0.060;
-	public final static double DRIVE_MIMIC_MIN_MAX = 0.35; //0.4
+	public final static double DRIVE_MIMICK_P = 0.016; //0.025
+	public final static double DRIVE_MIMICK_I = 0.00;
+	public final static double DRIVE_MIMICK_D = 0.060;
+	public final static double DRIVE_MIMICK_MIN_MAX = 0.35; //0.4
 
 	// Distance
 	public final static double DRIVE_DISTANCE_P = 0.00632;

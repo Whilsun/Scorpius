@@ -48,7 +48,7 @@ public final class Teleop {
 		if (cubeCaptureToggle.isToggled(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWO))) {
 			if(intake.hasCube()){
 				cubeCaptureToggle.setState(false);
-				intake.goToTop();
+				//intake.goToTop();
 			} else {
 				intake.intake();	
 			}
@@ -69,7 +69,7 @@ public final class Teleop {
 		final double upSpeed = operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y);
 		if(elevator.getMode() == ControlMode.MANUAL || Math.abs(upSpeed) > Constants.OPERATOR_DEADZONE) {
 			elevator.setMode(ControlMode.MANUAL);
-			elevator.setUpSpeed(upSpeed * operator.getRawAxis(Titan.LogitechExtreme3D.Axis.SLIDER));
+			elevator.setUpSpeed(-upSpeed);
 		}
 		
 		if(operator.getRawButton(Titan.LogitechExtreme3D.Button.ELEVEN)) {

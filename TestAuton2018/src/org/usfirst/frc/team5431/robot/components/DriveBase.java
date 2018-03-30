@@ -233,14 +233,14 @@ public class DriveBase {
 		 * ENCODER DEFINITIONS
 		 */
 		//Left side
-		backLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		backLeft.setSensorPhase(false);
-		backLeft.setSelectedSensorPosition(0, 0, 0);
+		middleLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+		middleLeft.setSensorPhase(false);
+		middleLeft.setSelectedSensorPosition(0, 0, 0);
 		
 		//Right side
-		backRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		backRight.setSensorPhase(false);
-		backRight.setSelectedSensorPosition(0, 0, 0);
+		frontRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
+		frontRight.setSensorPhase(false);
+		frontRight.setSelectedSensorPosition(0, 0, 0);
 		
 		/*//Left side
 		leftEncoder = new Encoder(Constants.ENCODER_LEFT_DRIVE_CHANNEL_1, Constants.ENCODER_LEFT_DRIVE_CHANNEL_2, false, EncodingType.k4X);
@@ -358,8 +358,8 @@ public class DriveBase {
 			SmartDashboard.putString("PIDValues", "Vision");
 			break;
 		case MIMIC:
-			drivePID.setPID(Constants.DRIVE_MIMIC_P, Constants.DRIVE_MIMIC_I, Constants.DRIVE_MIMIC_D, 0.0);
-			drivePID.setOutputRange(-Constants.DRIVE_MIMIC_MIN_MAX, Constants.DRIVE_MIMIC_MIN_MAX);
+			drivePID.setPID(Constants.DRIVE_MIMICK_P, Constants.DRIVE_MIMICK_I, Constants.DRIVE_MIMICK_D, 0.0);
+			drivePID.setOutputRange(-Constants.DRIVE_MIMICK_MIN_MAX, Constants.DRIVE_MIMICK_MIN_MAX);
 			SmartDashboard.putString("PIDValues", "Mimic");
 			break;
 		}
@@ -472,12 +472,12 @@ public class DriveBase {
 	}
 	
 	public final double getLeftDistance() {
-		return backLeft.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
+		return middleLeft.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
 
 	}
 	
 	public final double getRightDistance() {
-		return backRight.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
+		return frontRight.getSelectedSensorPosition(0) * Constants.ENCODER_DISTANCE_PER_PULSE;
 
 	}	
 	
@@ -509,8 +509,8 @@ public class DriveBase {
 	}
 
 	public final void resetEncoders() {
-		backLeft.setSelectedSensorPosition(0, 0, 0);
-		backRight.setSelectedSensorPosition(0, 0, 0);
+		middleLeft.setSelectedSensorPosition(0, 0, 0);
+		frontRight.setSelectedSensorPosition(0, 0, 0);
 		//leftEncoder.reset();
 		//rightEncoder.reset();
 	}

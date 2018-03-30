@@ -114,6 +114,7 @@ public class Intake {
 		SmartDashboard.putNumber("IntakeAmperage", intake.getOutputCurrent());
 		SmartDashboard.putNumber("IntakeTiltAngle", getTiltPosition());
 		SmartDashboard.putNumber("IntakeTiltCurrent", getTiltCurrent());
+		SmartDashboard.putBoolean("IntakeRunning", intake.get() >= 0.5);
 		
 		if (mode == ControlMode.AUTO) {
 			if (wantedTilt >= 0) {

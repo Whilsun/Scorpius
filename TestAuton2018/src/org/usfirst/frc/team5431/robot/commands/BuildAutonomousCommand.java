@@ -6,6 +6,7 @@ import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.Robot.AutonPriority;
 import org.usfirst.frc.team5431.robot.Titan.GameData.FieldObject;
 import org.usfirst.frc.team5431.robot.Titan.GameData.SideChooser;
+import org.usfirst.frc.team5431.robot.commands.MimicCommand.Paths;
 import org.usfirst.frc.team5431.robot.Robot.AutonPosition;
 
 public class BuildAutonomousCommand extends Titan.Command<Robot> {
@@ -41,27 +42,34 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 		switch (position) {
 		case CENTER: {
 			switch (priority) {
-			case SWITCH: {
+			case SWITCH_SCALE:
+			case SWITCH: 
+			case SCALE: {
 				game.setSelectedObject(FieldObject.SWITCH);
 				// aSteps.add(new DriveStep(60.0));
 				game.runSide(new SideChooser() {
 					@Override
 					public void left() {
-						aSteps.add(new DriveCommand(46.5, 65.0));
-						aSteps.add(new DriveCommand(51, -78));
+						aSteps.add(new MimicCommand(Paths.CENTER_LEFT_SWITCH));
+						
+						//aSteps.add(new DriveCommand(46.5, 65.0));
+						//aSteps.add(new DriveCommand(51, -78));
 					}
 
 					@Override
 					public void right() {
+						aSteps.add(new MimicCommand(Paths.CENTER_RIGHT_SWITCH));
+						
 						// aSteps.add(new DriveStep(3.0));
 						// aSteps.add(new TurnStep(35.0));
-						aSteps.add(new DriveCommand(60.0, -25.0));
-						aSteps.add(new DriveCommand(32.0, 70.0));
 						// aSteps.add(new TurnStep(-35.0));
 						// aSteps.add(new DriveStep(10.0));
+						
+						//aSteps.add(new DriveCommand(60.0, -25.0));
+						//aSteps.add(new DriveCommand(32.0, 70.0));
 					}
 				});
-				aSteps.add(new OuttakeCommand(Constants.AUTO_OUTTAKE_TIME));
+				//aSteps.add(new OuttakeCommand(Constants.AUTO_OUTTAKE_TIME));
 			}
 				break;
 			default:
@@ -70,30 +78,64 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 		}
 			break;
 		case LEFT:
-		case RIGHT:
 			switch (priority) {
 			case SWITCH_SCALE:
-				if (AutonPosition.valueOf(game.getAllianceSwitch()) == position) {
-					aSteps.add(new SwitchAutonomousCommand(game));
+			case SWITCH:
+			case SCALE:
+				game.setSelectedObject(FieldObject.SWITCH);
+				// aSteps.add(new DriveStep(60.0));
+				game.runSide(new SideChooser() {
+					@Override
+					public void left() {
+						aSteps.add(new MimicCommand(Paths.LEFT_LEFT_SWITCH));
+						
+						//aSteps.add(new DriveCommand(46.5, 65.0));
+						//aSteps.add(new DriveCommand(51, -78));
+					}
+
+					@Override
+					public void right() {
+						aSteps.add(new DriveCommand(150.0)); //new MimicCommand(Paths.CENTER_RIGHT_SWITCH));
+						
+						// aSteps.add(new DriveStep(3.0));
+						// aSteps.add(new TurnStep(35.0));
+						// aSteps.add(new TurnStep(-35.0));
+						// aSteps.add(new DriveStep(10.0));
+						
+						//aSteps.add(new DriveCommand(60.0, -25.0));
+						//aSteps.add(new DriveCommand(32.0, 70.0));
+					}
+				});
+				/*if (AutonPosition.valueOf(game.getAllianceSwitch()) == position) {
+				aSteps.add(new SwitchAutonomousCommand(game));
 				} else if (AutonPosition.valueOf(game.getScale()) == position) {
+					aSteps.add(new MimicCommand(Paths.valueOf(position.name() + "_" + game.getAllianceSwitch().name() + "_SWITCH")));
+					
 					aSteps.add(new ScaleAutonomousCommand(game));
 				} else {
 					aSteps.add(new DriveCommand(265.0));
 				}
+				break;*/
+				
+				/*if (AutonPosition.valueOf(game.getAllianceSwitch()) == position) {
+					//aSteps.add(new SwitchAutonomousCommand(game));
+					
+					//aSteps.add(new MimickCommand(Paths.valueOf(position.name() + "_" + game.getAllianceSwitch().name() + "_SWITCH")));
+				}else {
+					aSteps.add(new DriveCommand(265.0));
+				}*/
 				break;
-			case SWITCH:
-				if (AutonPosition.valueOf(game.getAllianceSwitch()) == position) {
-					aSteps.add(new SwitchAutonomousCommand(game));
-				}
-				break;
-			case SCALE:
+			/*case SCALE:
 				if (AutonPosition.valueOf(game.getScale()) == position) {
 					aSteps.add(new ScaleAutonomousCommand(game));
 				}
-				break;
+				break;*/
 			default:
 				break;
 			}
+			break;
+		case RIGHT:
+			aSteps.add(new DriveCommand(150.0));
 			break;
 		default:
 			break;

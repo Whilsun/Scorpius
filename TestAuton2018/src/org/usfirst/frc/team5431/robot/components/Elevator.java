@@ -9,7 +9,10 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.RemoteLimitSwitchSource;
 
 public class Elevator {
 	public static enum ControlMode {
@@ -38,7 +41,13 @@ public class Elevator {
 		
 		elevatorLeft.setInverted(Constants.TALON_ELEVATOR_LEFT_INVERTED);
 		elevatorRight.setInverted(Constants.TALON_ELEVATOR_RIGHT_INVERTED);
+		
+		elevatorLeft.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
+		elevatorLeft.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 0);
 
+		elevatorRight.configForwardLimitSwitchSource(RemoteLimitSwitchSource.RemoteTalonSRX, LimitSwitchNormal.NormallyOpen, elevatorLeft.getDeviceID(), 0);
+		elevatorRight.configReverseLimitSwitchSource(RemoteLimitSwitchSource.RemoteTalonSRX, LimitSwitchNormal.NormallyOpen, elevatorLeft.getDeviceID(), 0);
+		
 		elevator = new SpeedControllerGroup(elevatorLeft, elevatorRight);
 
 		lidar = new Titan.Lidar(Constants.LIDAR_PORT);
@@ -58,6 +67,9 @@ public class Elevator {
 	}
 
 	public void setUpSpeed(final double speed) {
+		if(speed <= 0 && getUpPos() <= Constants.HEIGHT_LOWEST) {
+			return;
+		}
 		elevator.set(speed);
 	}
 
@@ -112,6 +124,7 @@ public class Elevator {
 		SmartDashboard.putNumber("ElevatorHeight", getUpPos());
 		SmartDashboard.putNumber("WantedDistance", wantedHeight);
 		SmartDashboard.putString("ControlMode", mode.name());
+		SmartDashboard.putNumber("ElevatorAmp", elevatorLeft.getOutputCurrent());
 
 		if (mode == ControlMode.AUTO) {
 			if (wantedHeight >= 0) {
