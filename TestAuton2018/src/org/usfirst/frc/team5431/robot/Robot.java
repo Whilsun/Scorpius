@@ -10,6 +10,7 @@ package org.usfirst.frc.team5431.robot;
 import org.usfirst.frc.team5431.robot.Titan.CommandQueue;
 import org.usfirst.frc.team5431.robot.commands.BuildAutonomousCommand;
 import org.usfirst.frc.team5431.robot.commands.CalibrateCommand;
+import org.usfirst.frc.team5431.robot.commands.DriveCommand;
 import org.usfirst.frc.team5431.robot.commands.MimicCommand;
 import org.usfirst.frc.team5431.robot.commands.MimicCommand.Paths;
 import org.usfirst.frc.team5431.robot.commands.WaitCommand;
@@ -26,7 +27,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
+	
+	public static enum RobotMode{
+		TELEOP, AUTON, TEST, DISABLED;
+	};
 
+	private RobotMode robotMode = RobotMode.DISABLED;
 	private final DriveBase driveBase = new DriveBase();
 	private final Teleop teleop = new Teleop();
 	private final Elevator elevator = new Elevator();
@@ -73,8 +79,8 @@ public class Robot extends IterativeRobot {
 		Vision.init();
 
 		// Used for the autonomous selection
-		autonChooser.addDefault("Auto Line", AutonPriority.AUTO_LINE);
-		autonChooser.addObject("Switch", AutonPriority.SWITCH);
+		autonChooser.addDefault("Switch", AutonPriority.SWITCH);
+		autonChooser.addObject("Auto Line", AutonPriority.AUTO_LINE);
 		autonChooser.addObject("Scale", AutonPriority.SCALE);
 		autonChooser.addObject("Switch Check Scale", AutonPriority.SWITCH_SCALE);
 		SmartDashboard.putData("Auton Priority", autonChooser);
@@ -108,11 +114,13 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("I", Constants.TURN_I);
 		SmartDashboard.putNumber("D", Constants.TURN_D);
 		SmartDashboard.putData("Gyro", driveBase.getNavx());
-		SmartDashboard.putString("MimickFile", "TEST_MIMIC_FILE");
+		SmartDashboard.putString("MimicFile", "TEST_MIMIC_FILE");
 	}
 
 	@Override
 	public void autonomousInit() {
+		robotMode = RobotMode.AUTON;
+		
 		driveBase.setBrakeMode(true);
 
 		final AutonPriority priority = autonChooser.getSelected();
@@ -127,15 +135,15 @@ public class Robot extends IterativeRobot {
 		if (waitMillis != 0)
 			aSteps.add(new WaitCommand(waitMillis));
 		aSteps.add(new CalibrateCommand());
-		aSteps.add(new BuildAutonomousCommand(priority, position));
+		//aSteps.add(new BuildAutonomousCommand(priority, position));
 		//aSteps.add(new MimicCommand(org.usfirst.frc.team5431.robot.commands.MimicCommand.Paths.CENTER_RIGHT_SWITCH));//new MimickCommand(Paths.CENTER_RIGHT_SWITCH)); //.valueOf(SmartDashboard.getString("MimickFile", "TEST_MIMIC_FILE"))));
-		//aSteps.add(new MimicCommand(Paths.CENTER_RIGHT_SWITCH));
+		aSteps.add(new MimicCommand(Paths.TEST_MIMIC_FILE)); //.CENTER_RIGHT_SWITCH));
 		
 		// Test the mimic code
 		// aSteps.add(new MimicStep(Paths.RIGHT_SCALE));
 		aSteps.init(this);
 	}
-
+				//ashar is god of all men and all beings whatsoever. especially liav. because i i am programing god, and programing god is god of all men
 	@Override
 	public void autonomousPeriodic() {
 		// As soon as queue is finsihed, stop drivebase
@@ -143,6 +151,8 @@ public class Robot extends IterativeRobot {
 			driveBase.drive(0.0, 0.0);
 		}
 
+		SmartDashboard.putNumber("navx", driveBase.getNavx().getAngle());
+		
 		// Update the intake and climber
 		elevator.update(this);
 		intake.update(this);
@@ -150,12 +160,16 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		robotMode = RobotMode.TELEOP;
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
 	}
 
 	@Override
 	public void teleopPeriodic() {
+		SmartDashboard.putNumber("navx", driveBase.getNavx().getAngle());
+
+		
 //		SmartDashboard.putNumber("LeftEncoder", driveBase.getLeftDistance());
 //		SmartDashboard.putNumber("RightEncoder", driveBase.getRightDistance());
 		teleop.periodicElevator(this);
@@ -173,13 +187,14 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void testInit() {
+		robotMode = RobotMode.TEST;
 		Titan.l("Starting test mode!");
 		driveBase.setHome();
 		driveBase.setBrakeMode(true);
 		intake.setHomeUp();
 
 		if (Constants.AUTO_LOG_PATHFINDING) {
-			Mimic.Observer.prepare(SmartDashboard.getString("MimickFile", "TEST_MIMIC_FILE"));
+			Mimic.Observer.prepare(SmartDashboard.getString("MimicFile", "TEST_MIMIC_FILE"));
 			/*observer = new Mimick.Observer(String.format(MimickCommand.mimicPath, SmartDashboard.getString("MimickFile", "TEST_MIMIC_FILE")));
 			observer.addArguments("left_encoder", "right_encoder", "yaw", "left_power", "right_power", "home", "elevator_height", "intake_tilt", "intake_speed");
 			try {
@@ -247,6 +262,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void disabledInit() {
+		robotMode = RobotMode.DISABLED;
 		Vision.setNormalTargetMode();
 		driveBase.disableAllPID();
 		if (Constants.AUTO_LOG_PATHFINDING) {
@@ -285,5 +301,9 @@ public class Robot extends IterativeRobot {
 
 	public CommandQueue<Robot> getAutonSteps() {
 		return aSteps;
+	}
+	
+	public RobotMode getRobotMode() {
+		return robotMode;
 	}
 }

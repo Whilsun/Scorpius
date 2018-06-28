@@ -29,7 +29,7 @@ public class ElevatorHeightCommand extends Titan.Command<Robot>{
 
 	@Override
 	public void done(final Robot robot) {
-		robot.getElevator().stopUp();
+		robot.getElevator().stopUp(robot);
 		robot.getElevator().resetWantedHeight();
 	}
 

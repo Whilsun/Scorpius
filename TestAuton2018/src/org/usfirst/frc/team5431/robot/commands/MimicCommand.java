@@ -10,6 +10,8 @@ import org.usfirst.frc.team5431.robot.pathfinding.Mimic;
 import org.usfirst.frc.team5431.robot.pathfinding.Mimic.Stepper;
 import org.usfirst.frc.team5431.robot.vision.Vision;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class MimicCommand extends Titan.Command<Robot> {
 	public static enum Paths {
 		TEST_MIMIC_FILE, CENTER_LEFT_SWITCH, CENTER_RIGHT_SWITCH, LEFT_LEFT_SWITCH, RIGHT_RIGHT_SWITCH, LEFT_RIGHT_SWITCH, RIGHT_RIGHT_SCALE, RIGHT_TWO_CUBE_SWITCH
@@ -56,8 +58,13 @@ public class MimicCommand extends Titan.Command<Robot> {
 			if(step.isHome) {
 				robot.getDriveBase().reset(); //Do not call setHome because that disables PID
 			} else {
+				//robot.getDriveBase().drive(step.leftPower, step.rightPower);
 				final double power = (step.leftPower + step.rightPower) / 2.0;
 				
+				SmartDashboard.putNumber("targetyaw", step.angle);
+				SmartDashboard.putBoolean("hasTravelled", robot.getDriveBase().hasTravelled(step.leftDistance));
+				SmartDashboard.putNumber("targetDistance", step.leftDistance);
+				SmartDashboard.putNumber("currentDistance", robot.getDriveBase().getLeftDistance());
 				robot.getDriveBase().updateStepResults(power, step.angle);
 				if(!robot.getDriveBase().hasTravelled(step.leftDistance) && !(Math.abs(power) < Constants.AUTO_PATHFINDING_OVERRIDE_NEXT_STEP_SPEED)) {
 					Titan.l("Mimic is falling behind!");
@@ -66,6 +73,7 @@ public class MimicCommand extends Titan.Command<Robot> {
 			}
 			robot.getElevator().setWantedHeight(step.elevatorHeight, true); //MIMIC OVERRIDE
 			robot.getIntake().setWantedTilt(step.intakeTilt);
+			System.out.println(step.intakeSpeed);
 			robot.getIntake().setIntakeSpeed(step.intakeSpeed);
 		} catch (IndexOutOfBoundsException e) {}
 		if(nextStep || skippedSteps > 5) {

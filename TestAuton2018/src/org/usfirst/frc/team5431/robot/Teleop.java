@@ -2,6 +2,9 @@ package org.usfirst.frc.team5431.robot;
 
 import org.usfirst.frc.team5431.robot.components.Elevator;
 import org.usfirst.frc.team5431.robot.components.Intake;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import org.usfirst.frc.team5431.robot.components.Elevator.ControlMode;
 
 public final class Teleop {
@@ -28,6 +31,7 @@ public final class Teleop {
 		robot.getDriveBase().drive(vals[0], vals[1]);
 		return vals;
 	}
+	//Matthew Likes Acarde Drive :)
 	
 	public final void periodicIntake(final Robot robot) {
 		final Intake intake = robot.getIntake();
@@ -45,7 +49,7 @@ public final class Teleop {
 			intake.stopTilting();
 		}
 		
-		if (cubeCaptureToggle.isToggled(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWO))) {
+		if (cubeCaptureToggle.isToggled(operator.getRawButton(Titan.LogitechExtreme3D.Button.THREE))) {
 			if(intake.hasCube()){
 				cubeCaptureToggle.setState(false);
 				//intake.goToTop();
@@ -54,7 +58,7 @@ public final class Teleop {
 			}
 		} else if (operator.getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
 			intake.outtake();
-		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.THREE)){
+		} else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWO)){
 			intake.intake();
 		}else {
 			intake.stopIntake();
@@ -66,30 +70,38 @@ public final class Teleop {
 	public final void periodicElevator(final Robot robot) {
 		final Elevator elevator = robot.getElevator();
 
-		final double upSpeed = operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y);
-		if(elevator.getMode() == ControlMode.MANUAL || Math.abs(upSpeed) > Constants.OPERATOR_DEADZONE) {
-			elevator.setMode(ControlMode.MANUAL);
-			elevator.setUpSpeed(-upSpeed);
-		}
+		final double upSpeed = -operator.getRawAxis(Titan.LogitechExtreme3D.Axis.Y);
+		SmartDashboard.putNumber("UpSpeed", upSpeed);
+		//if(elevator.getMode() == ControlMode.MANUAL || Math.abs(upSpeed) > Constants.OPERATOR_DEADZONE) {
+		//	elevator.setMode(ControlMode.MANUAL);
+//			if(robot.getIntake().getTiltPosition() < 60 || (-upSpeed < 0)) {
+//				elevator.setUpSpeed(-upSpeed);
+//			}
+			elevator.setUpSpeed(upSpeed, robot);
+		//}
 		
-		if(operator.getRawButton(Titan.LogitechExtreme3D.Button.ELEVEN)) {
-			elevator.setWantedHeight(Constants.HEIGHT_STEAL);
-		}
-		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.NINE)) {
-			elevator.setWantedHeight(Constants.HEIGHT_SWITCH);
-		}
-		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.SEVEN)) {
-			elevator.setWantedHeight(Constants.HEIGHT_SCALE);
-		}
-		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWELVE)) {
-			elevator.goToBottom();
-		}
-		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TEN)) {
-			elevator.setWantedHeight(Constants.HEIGHT_SECOND_LAYER);
-		}
-		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.EIGHT)) {
-			elevator.setWantedHeight(Constants.HEIGHT_THIRD_LAYER);
-		}
+//		if(operator.getRawButton(Titan.LogitechExtreme3D.Button.ELEVEN)) {
+//			elevator.setWantedHeight(Constants.HEIGHT_STEAL);
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.NINE)) {
+//			elevator.setWantedHeight(Constants.HEIGHT_SWITCH);
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.SEVEN)) {
+//			//elevator.setWantedHeight(Constants.HEIGHT_SCALE);
+//			elevator.goToTop();
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.SIX)) {
+//			robot.getIntake().reset();
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TWELVE)) {
+//			elevator.goToBottom();
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.TEN)) {
+//			elevator.setWantedHeight(Constants.HEIGHT_SECOND_LAYER);
+//		}
+//		else if(operator.getRawButton(Titan.LogitechExtreme3D.Button.EIGHT)) {
+//			elevator.setWantedHeight(Constants.HEIGHT_THIRD_LAYER);
+//		}
 		
 		elevator.update(robot);
 	}

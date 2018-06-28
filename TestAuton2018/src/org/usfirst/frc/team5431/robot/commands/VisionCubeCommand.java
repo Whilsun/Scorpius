@@ -19,7 +19,7 @@ public class VisionCubeCommand extends Titan.Command<Robot>{
 	@Override
 	public CommandResult update(final Robot robot) {
 		if(robot.getElevator().isAtWantedHeight()) {
-			robot.getElevator().stopUp();
+			robot.getElevator().stopUp(robot);
 		}
 		
 		if(robot.getIntake().hasCube()) {
@@ -33,7 +33,7 @@ public class VisionCubeCommand extends Titan.Command<Robot>{
 	@Override
 	public void done(final Robot robot) {
 		robot.getDriveBase().disableAllPID();
-		robot.getElevator().stopUp();
+		robot.getElevator().stopUp(robot);
 		robot.getIntake().stopIntake();
 	}
 

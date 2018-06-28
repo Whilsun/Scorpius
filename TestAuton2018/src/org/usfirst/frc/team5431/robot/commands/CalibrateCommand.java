@@ -23,7 +23,7 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 	@Override
 	public void init(final Robot robot) {
 		robot.getDriveBase().drive(0.0, 0.0);
-		robot.getElevator().stopUp();
+		robot.getElevator().stopUp(robot);
 		robot.getIntake().stopIntake();
 		robot.getIntake().setHomeUp();
 	}
@@ -31,7 +31,7 @@ public class CalibrateCommand extends Titan.Command<Robot> {
 	@Override
 	public void done(final Robot robot) {
 		robot.getDriveBase().setHome();
-		robot.getElevator().stopUp();
+		robot.getElevator().stopUp(robot);
 		robot.getIntake().stopIntake();
 	}
 }

@@ -67,8 +67,8 @@ public class DriveBase {
 			switch(pidSourceType) {
 			case NAVX_MIMIC:
 			case NAVX:
-				SmartDashboard.putNumber("yaw", navx.getYaw());
-				return navx.getYaw();
+				SmartDashboard.putNumber("yaw", navx.getAngle());
+				return navx.getAngle();
 			case VISION:
 				//IF WE WANT TO USE YOLO (USE THE BELOW FINDER)
 				//angle = CubeFinder.getAngleFromClosestCube();
@@ -259,7 +259,7 @@ public class DriveBase {
 		 * PID DEFINITIONS
 		 */
 		//Turning PID
-		drivePID.setInputRange(-90, 90);
+		drivePID.setInputRange(-1080, 1080);
 		drivePID.setOutputRange(-1, 1);
 		drivePID.setAbsoluteTolerance(0.5);
 		drivePID.setContinuous(true);
@@ -499,7 +499,7 @@ public class DriveBase {
 	}
 	
 	public final boolean hasTurned(final double wantedAngle) {
-		return Titan.approxEquals(wantedAngle, navx.getYaw(), Constants.TURN_PRECISION);
+		return Titan.approxEquals(wantedAngle, navx.getAngle(), Constants.TURN_PRECISION);
 	}
 
 	public final void resetNavx() {

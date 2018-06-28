@@ -1,6 +1,5 @@
 package org.usfirst.frc.team5431.robot.commands;
 
-import org.usfirst.frc.team5431.robot.Constants;
 import org.usfirst.frc.team5431.robot.Robot;
 import org.usfirst.frc.team5431.robot.Titan;
 import org.usfirst.frc.team5431.robot.Robot.AutonPriority;
@@ -42,6 +41,7 @@ public class BuildAutonomousCommand extends Titan.Command<Robot> {
 		switch (position) {
 		case CENTER: {
 			switch (priority) {
+			case AUTO_LINE:
 			case SWITCH_SCALE:
 			case SWITCH: 
 			case SCALE: {

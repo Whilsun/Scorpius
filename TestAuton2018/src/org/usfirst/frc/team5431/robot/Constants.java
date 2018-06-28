@@ -75,7 +75,7 @@ public final class Constants {
 	public final static double INTAKE_TILT_SPEED = 1.0;
 	public final static double INTAKE_SPEED = 1.0;
 	public final static double OUTTAKE_SPEED = -INTAKE_SPEED;
-	public final static double INTAKE_STOPPED_SPEED = 0.075; //0.12;
+	public final static double INTAKE_STOPPED_SPEED = 0.12; //0.12;
 	public final static double ELEVATOR_DOWN_SPEED = -0.125;
 	// HALLFX
 	public final static int HALLFX_PORT = 0;

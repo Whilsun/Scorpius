@@ -103,7 +103,7 @@ public class Mimic {
 			try {
 				final double lDistance = robot.getDriveBase().getLeftDistance();
 				final double rDistance = robot.getDriveBase().getRightDistance();
-				final float angle = robot.getDriveBase().getNavx().getYaw();
+				final double angle = robot.getDriveBase().getNavx().getAngle();
 				final double leftPower = driveVals[0];
 				final double rightPower = driveVals[1];
 				boolean home = robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.FIVE);
@@ -112,7 +112,7 @@ public class Mimic {
 				double intakeSpeed = Constants.INTAKE_STOPPED_SPEED;
 				if(robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.TRIGGER)) {
 					intakeSpeed = Constants.OUTTAKE_SPEED;
-				} else if(robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.THREE)) {
+				} else if(robot.getTeleop().getLogitech().getRawButton(Titan.LogitechExtreme3D.Button.TWO)) {
 					intakeSpeed = Constants.INTAKE_SPEED;
 				}
 				
